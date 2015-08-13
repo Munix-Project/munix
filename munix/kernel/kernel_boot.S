@@ -42,8 +42,8 @@ stack_top:
 .global start
 .type start, @function
 
-.extern main
-.type main, @function
+.extern kmain
+.type kmain, @function
 
 start:
     /* Setup our stack */
@@ -58,9 +58,9 @@ start:
 
     /* Disable interrupts and call kernel proper */
     cli
-    call main
+    call kmain
 
-    /* Clear interrupts and hang if we return from main */
+    /* Clear interrupts and hang if we return from kmain */
     cli
 hang:
     hlt
