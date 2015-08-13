@@ -8,8 +8,6 @@
 #ifndef KERNEL_INCLUDE_PCI_LIST_H_
 #define KERNEL_INCLUDE_PCI_LIST_H_
 
-
-
 #if 0
 
 PCIHDR.H: PCI Vendors, Devices, and Class Type information

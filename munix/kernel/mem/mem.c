@@ -432,8 +432,10 @@ void page_fault(struct regs *r)  {
 	uint32_t faulting_address;
 	asm volatile("mov %%cr2, %0" : "=r"(faulting_address));
 
+#ifdef STDOUT_TERM
 	log_clrscr();
 	log_reset();
+#endif
 	debug_print(CRITICAL, "Page fault at address %d", faulting_address);
 
 
@@ -532,7 +534,7 @@ void * sbrk(uintptr_t increment) {
 	if (heap_end + increment > kernel_heap_alloc_point) {
 		debug_print(INFO, "Hit the end of available kernel heap, going to allocate more (at 0x%x, want to be at 0x%x)", heap_end, heap_end + increment);
 		for (uintptr_t i = heap_end; i < heap_end + increment; i += 0x1000) {
-			debug_print(INFO, "Allocating frame at 0x%x...", i);
+			//xxx debug_print(INFO, "Allocating frame at 0x%x...", i);
 			alloc_frame(get_page(i, 0, kernel_directory), 1, 0);
 		}
 		invalidate_page_tables();

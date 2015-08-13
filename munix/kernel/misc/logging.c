@@ -30,7 +30,7 @@ static char buffer[1024];
 
 #ifdef STDOUT_TERM
 UPoint cursor = {0,0};
-#endif
+
 
 void puts(char * str){
 	for(unsigned i=0; i< strlen(str);i++){
@@ -41,6 +41,7 @@ void puts(char * str){
 		}
 	}
 }
+#endif
 
 void _debug_print(char * title, int line_no, log_type_t level, char *fmt, ...) {
 	va_list args;

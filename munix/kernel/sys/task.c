@@ -490,10 +490,6 @@ void enter_user_jmp(uintptr_t location, int argc, char ** argv, uintptr_t stack)
 	IRQ_OFF;
 	set_kernel_stack(current_process->image.stack);
 
-	log_clrscr();
-		for(;;);
-
-
 	PUSH(stack, uintptr_t, (uintptr_t)argv);
 	PUSH(stack, int, argc);
 	enter_userspace(location, stack);

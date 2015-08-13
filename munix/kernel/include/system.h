@@ -15,7 +15,7 @@
 #include <process.h>
 #include <errno_defs.h>
 
-#define STDOUT_TERM // Output directly to video memory at 0xb8000 or not (undefine it if you don't want any output)
+#undef STDOUT_TERM // Output directly to video memory at 0xb8000 or not (undefine it if you don't want any output)
 
 #define STR(x) #x
 #define STRSTR(x) STR(x)

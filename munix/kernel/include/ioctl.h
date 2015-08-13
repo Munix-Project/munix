@@ -8,7 +8,7 @@
 #ifndef KERNEL_INCLUDE_IOCTL_H_
 #define KERNEL_INCLUDE_IOCTL_H_
 
-//xxx #include <termios.h>
+#include <termios.h>
 
 #define IOCTLDTYPE 0x4F00
 
