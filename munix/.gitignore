@@ -1,3 +1,17 @@
 /.cproject
 /.project
 /qemu-vlan0.pcap
+/ata.ko
+/ext2.ko
+/lfbvideo.ko
+/packetfs.ko
+/procfs.ko
+/pcspkr.ko
+/ps2kbd.ko
+/ps2mouse.ko
+/random.ko
+/serial.ko
+/snd.ko
+/tmpfs.ko
+/toaruos-disk.img
+/zero.ko

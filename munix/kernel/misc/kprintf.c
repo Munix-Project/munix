@@ -6,9 +6,9 @@
  */
 
 #include <system.h>
-//xxx #include <process.h>
+#include <process.h>
 #include <va_list.h>
-//xxx #include <fs.h>
+#include <printf.h>
 
 static unsigned short * textmemptr = (unsigned short *)0xB8000;
 
@@ -133,7 +133,7 @@ void putc(unsigned char c, int x, int y, int attr) {
 	*where = c | (attr << 8);
 }
 
-/*xxx int fprintf(fs_node_t * device, char *fmt, ...) {
+int fprintf(fs_node_t * device, char *fmt, ...) {
 	va_list args;
 	va_start(args, fmt);
 	char buffer[1024];
@@ -141,7 +141,7 @@ void putc(unsigned char c, int x, int y, int attr) {
 	va_end(args);
 
 	return write_fs(device, 0, strlen(buffer), (uint8_t *)buffer);
-}*/
+}
 
 int sprintf(char * buf, const char *fmt, ...) {
 	va_list args;

@@ -7,7 +7,7 @@
 
 #include <system.h>
 #include <libc.h>
-//XXX #include <list.h>
+#include <list.h>
 #include <logging.h>
 #include <va_list.h>
 #include <printf.h>
@@ -48,14 +48,14 @@ void _debug_print(char * title, int line_no, log_type_t level, char *fmt, ...) {
 	vasprintf(buffer, fmt, args);
 	va_end(args);
 
-	/*XXX char * type;
+	char * type;
 	if (level > INSANE) {
 		type = "";
 	} else {
 		type = c_messages[level];
-	}*/
+	}
 
-	//XXX fprintf(debug_file, "[%10d.%3d:%s:%d]%s %s\n", timer_ticks, timer_subticks, title, line_no, type, buffer);
+	fprintf(debug_file, "[%10d.%3d:%s:%d]%s %s\n", timer_ticks, timer_subticks, title, line_no, type, buffer);
 
 #ifdef STDOUT_TERM
 	// Output buffer:
@@ -66,5 +66,14 @@ void _debug_print(char * title, int line_no, log_type_t level, char *fmt, ...) {
 	puts(buffer);
 
 	cursor.X=0; cursor.Y++;
+	if(cursor.Y>25){ // Scroll down
+		char * vidmem = (char*)0xb8000;
+		for (uint32_t i = 0; i <= 25 * 80 * 2; i++){
+			vidmem[i] = vidmem[i + 80*2];
+			vidmem[i + 80*2] = 0;
+
+		}
+		cursor.Y = 24;
+	}
 #endif
 }

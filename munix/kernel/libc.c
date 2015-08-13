@@ -133,7 +133,7 @@ size_t strlen(const char * s) {
 
 char * strdup(const char * s) {
 	size_t l = strlen(s);
-	// XXX return memcpy(malloc(l+1), s, l+1);
+	return memcpy(malloc(l+1), s, l+1);
 	return NULL;
 }
 

@@ -11,10 +11,8 @@
 
 void halt_and_catch_fire(char * error_message, const char * file, int line, struct regs * regs) {
 	IRQ_OFF;
-	debug_print(CRITICAL, "Kernel Panic!");
-	debug_print(NORMAL,""); // New line
 	debug_print(ERROR, "HACF: %s", error_message);
-	// xxx debug_print(ERROR, "Proc: %d", getpid());
+	debug_print(ERROR, "Proc: %d", getpid());
 	debug_print(ERROR, "File: %s", file);
 	debug_print(ERROR, "Line: %d", line);
 	if (regs) {
@@ -28,21 +26,27 @@ void halt_and_catch_fire(char * error_message, const char * file, int line, stru
 		debug_print(ERROR, "eip=0x%x",          regs->eip);
 	}
 	debug_print(ERROR, "This process has been descheduled.");
-
-	// temporary:
-	PAUSE;
+	kexit(1);
 }
 
-void assert_failed(const char *file, uint32_t line, const char *desc){
+void assert_failed(const char *file, uint32_t line, const char *desc) {
 	IRQ_OFF;
-	log_clrscr();
-	log_reset();
 	debug_print(INSANE, "Kernel Assertion Failed: %s", desc);
 	debug_print(INSANE, "File: %s", file);
 	debug_print(INSANE, "Line: %d", line);
 	debug_print(INSANE, "System Halted!");
 
-	// This is our life now:
+	if (debug_video_crash) {
+		char msg[4][256];
+		sprintf(msg[0], "Kernel Assertion Failed: %s", desc);
+		sprintf(msg[1], "File: %s", file);
+		sprintf(msg[2], "Line: %d", line);
+		sprintf(msg[3], "System Halted!");
+		char * msgs[] = {msg[0], msg[1], msg[2], msg[3], NULL};
+		debug_video_crash(msgs);
+	}
+
+	// This is our life now
 	while (1) {
 		IRQ_OFF;
 		PAUSE;

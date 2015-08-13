@@ -8,6 +8,7 @@
 #ifndef KERNEL_INCLUDE_MODULE_H_
 #define KERNEL_INCLUDE_MODULE_H_
 
+#include <hashmap.h>
 
 typedef struct {
     char * name;
@@ -18,7 +19,7 @@ typedef struct {
 typedef struct {
     module_defs * mod_info;
     void * bin_data;
-    // xxx hashmap_t * symbols;
+    hashmap_t * symbols;
     uintptr_t end;
     size_t deps_length;
     char * deps;
@@ -39,8 +40,8 @@ extern void modules_install(void);
             .finalize   = &fini \
         }
 
-//xxx extern hashmap_t * modules_get_list(void);
-//xxx extern hashmap_t * modules_get_symbols(void);
+extern hashmap_t * modules_get_list(void);
+extern hashmap_t * modules_get_symbols(void);
 
 #define MODULE_DEPENDS(n) \
     static char _mod_dependency_ ## n [] __attribute__((section("moddeps"), used)) = #n

@@ -9,6 +9,11 @@
 #define KERNEL_INCLUDE_SYSTEM_H_
 
 #include <types.h>
+#include <list.h>
+#include <task.h>
+#include <libc.h>
+#include <process.h>
+#include <errno_defs.h>
 
 #define STDOUT_TERM // Output directly to video memory at 0xb8000 or not (undefine it if you don't want any output)
 
@@ -32,6 +37,8 @@ void int_disable(void);
 void int_resume(void);
 void int_enable(void);
 
+int debug_shell_start(void);
+
 extern void * code;
 extern void * end;
 
@@ -53,8 +60,11 @@ extern void idt_install(void);
 extern void idt_set_gate(uint8_t num, void (*base)(void), uint16_t sel, uint8_t flags);
 
 /* ISR */
+typedef void (*irq_handler_t) (struct regs *);
+typedef int (*irq_handler_chain_t) (struct regs *);
+
 extern void isr_install(void);
-//XXX extern void isr_install_handler(size_t isrs, irq_handler_t);
+extern void isr_install_handler(size_t isrs, irq_handler_t);
 extern void isr_uninstall_handler(size_t isrs);
 
 /* Registers
@@ -72,9 +82,6 @@ struct regs {
 typedef struct regs regs_t;
 
 /* Interrupt Handlers */
-typedef void (*irq_handler_t) (struct regs *);
-typedef int (*irq_handler_chain_t) (struct regs *);
-
 extern void irq_install(void);
 extern void irq_install_handler(size_t irq, irq_handler_chain_t);
 extern void irq_uninstall_handler(size_t irq);
@@ -90,14 +97,79 @@ void assert_failed(const char *file, uint32_t line, const char *desc);
 #define assert(statement) ((statement) ? (void)0 : assert_failed(__FILE__, __LINE__, #statement))
 
 /* Timer */
+struct timeval {
+	uint32_t tv_sec;
+	uint32_t tv_usec;
+};
 extern void timer_install(void);
 extern unsigned long timer_ticks;
 extern unsigned long timer_subticks;
 extern signed long timer_drift;
 extern void relative_time(unsigned long seconds, unsigned long subseconds, unsigned long * out_seconds, unsigned long * out_subseconds);
 
+/* CMOS */
+extern void get_time(uint16_t * hours, uint16_t * minutes, uint16_t * seconds);
+extern void get_date(uint16_t * month, uint16_t * day);
+extern uint32_t boot_time;
+extern uint32_t read_cmos(void);
+extern int gettimeofday(struct timeval * t, void * z);
+extern uint32_t now(void);
+
+/* Floating Point Unit */
+extern void switch_fpu(void);
+extern void fpu_install(void);
+
+/* Memory Management */
+	extern uintptr_t placement_pointer;
+	extern void kmalloc_startat(uintptr_t address);
+	extern uintptr_t kmalloc_real(size_t size, int align, uintptr_t * phys);
+	extern uintptr_t kmalloc(size_t size);
+	extern uintptr_t kvmalloc(size_t size);
+	extern uintptr_t kmalloc_p(size_t size, uintptr_t * phys);
+	extern uintptr_t kvmalloc_p(size_t size, uintptr_t * phys);
+	extern void *sbrk(uintptr_t increment);
+	/* klmalloc */
+	void * __attribute__ ((malloc)) malloc(size_t size);
+	void * __attribute__ ((malloc)) realloc(void *ptr, size_t size);
+	void * __attribute__ ((malloc)) calloc(size_t nmemb, size_t size);
+	void * __attribute__ ((malloc)) valloc(size_t size);
+	void free(void *ptr);
+
+	// Page types moved to task.h
+	extern page_directory_t *kernel_directory;
+	extern page_directory_t *current_directory;
+
+	extern void paging_install(uint32_t memsize);
+	extern void paging_prestart(void);
+	extern void paging_finalize(void);
+	extern void paging_mark_system(uint64_t addr);
+	extern void switch_page_directory(page_directory_t * new);
+	extern void invalidate_page_tables(void);
+	extern void invalidate_tables_at(uintptr_t addr);
+	extern page_t *get_page(uintptr_t address, int make, page_directory_t * dir);
+	extern void page_fault(struct regs *r);
+	extern void dma_frame(page_t * page, int, int, uintptr_t);
+	extern void debug_print_directory(page_directory_t *);
+
+	void heap_install(void);
+
+	void alloc_frame(page_t *page, int is_kernel, int is_writeable);
+	void free_frame(page_t *page);
+	uintptr_t memory_use(void);
+	uintptr_t memory_total(void);
+
+/* spin.c */
+typedef volatile int spin_lock_t[2];
+extern void spin_init(spin_lock_t lock);
+extern void spin_lock(spin_lock_t lock);
+extern void spin_unlock(spin_lock_t lock);
+
+extern void return_to_userspace(void);
+
 /* Kernel Main */
 extern unsigned short *memsetw(unsigned short *dest, unsigned short val, int count);
+extern uint32_t krand(void);
+extern uint8_t startswith(const char * str, const char * accept);
 
 extern unsigned char inportb(unsigned short _port);
 extern void outportb(unsigned short _port, unsigned char _data);
@@ -107,5 +179,47 @@ extern unsigned int inportl(unsigned short _port);
 extern void outportl(unsigned short _port, unsigned int _data);
 extern void outportsm(unsigned short port, unsigned char * data, unsigned long size);
 extern void inportsm(unsigned short port, unsigned char * data, unsigned long size);
+
+/* wakeup queue */
+extern int wakeup_queue(list_t * queue);
+extern int wakeup_queue_interrupted(list_t * queue);
+extern int sleep_on(list_t * queue);
+
+// Signal
+typedef struct {
+	uint32_t  signum;
+	uintptr_t handler;
+	regs_t registers_before;
+} signal_t;
+extern void handle_signal(process_t *, signal_t *);
+extern int send_signal(pid_t process, uint32_t signal);
+
+#define USER_STACK_BOTTOM 0xAFF00000
+#define USER_STACK_TOP    0xB0000000
+#define SHM_START         0xB0000000
+
+/* Tasks */
+extern uintptr_t read_eip(void);
+extern void copy_page_physical(uint32_t, uint32_t);
+extern page_directory_t * clone_directory(page_directory_t * src);
+extern page_table_t * clone_table(page_table_t * src, uintptr_t * physAddr);
+extern void move_stack(void *new_stack_start, size_t size);
+extern void kexit(int retval);
+extern void task_exit(int retval);
+extern uint32_t next_pid;
+
+extern void tasking_install(void);
+extern void switch_task(uint8_t reschedule);
+extern void switch_next(void);
+extern uint32_t fork(void);
+extern uint32_t clone(uintptr_t new_stack, uintptr_t thread_func, uintptr_t arg);
+extern uint32_t getpid(void);
+extern void enter_user_jmp(uintptr_t location, int argc, char ** argv, uintptr_t stack);
+
+/* System Calls */
+extern void syscalls_install(void);
+
+extern void validate(void * ptr);
+extern int validate_safe(void * ptr);
 
 #endif /* KERNEL_INCLUDE_SYSTEM_H_ */
