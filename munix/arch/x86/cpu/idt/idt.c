@@ -32,6 +32,7 @@ static struct {
 
 typedef void (*idt_gate_t)(void);
 
+/* Declared in idt_load.S */
 extern void idt_load(uintptr_t);
 
 void idt_set_gate(uint8_t num, idt_gate_t base, uint16_t sel, uint8_t flags) {

@@ -108,73 +108,78 @@ void setup_cmdline_finalize(char* cmdline) {
 
 void load_grub_modules() {
 	// Or, in this case (FOR NOW), QEMU's modules ;)
-	for (unsigned int i = 0; i < mboot_ptr->mods_count; ++i ) {
-		mboot_mod_t * mod = &mboot_mods[i];
-		uint32_t module_start = mod->mod_start;
-		uint32_t module_end = mod->mod_end;
-		size_t   module_size = module_end - module_start;
+	for (unsigned int i = 0; i < mboot_mods_count; ++i ) {
+		/* Fetch module: */
+		mboot_mod_t *	mod 		 = &mboot_mods[i];
+		uint32_t 		module_start = mod->mod_start;
+		uint32_t 		module_end 	 = mod->mod_end;
+		size_t   		module_size  = module_end - module_start;
 
-		int check_result = module_quickcheck((void *)module_start);
-		if (check_result == 1) {
+		/* Handle it: */
+		switch(module_quickcheck((void *)module_start)) { /* Check module 1st */
+		case 1:
+			/* Single Module */
 			debug_print(NOTICE, "Loading a module: 0x%x:0x%x", module_start, module_end);
 			module_data_t * mod_info = (module_data_t *)module_load_direct((void *)(module_start), module_size);
-			if (mod_info) {
+
+			if (mod_info)
 				debug_print(NOTICE, "Loaded: %s", mod_info->mod_info->name);
-			}
-		} else if (check_result == 2) {
+			break;
+		case 2:
 			/* Mod pack */
 			debug_print(NOTICE, "Loading modpack. %x", module_start);
 			struct pack_header * pack_header = (struct pack_header *)module_start;
 			while (pack_header->region_size) {
 				void * start = (void *)((uintptr_t)pack_header + 4096);
-				int result = module_quickcheck(start);
-				if (result != 1) {
+
+				/* Check module: */
+				if (module_quickcheck(start) != 1)
 					debug_print(WARNING, "Not actually a module?! %x", start);
-				}
+
+				/* Get module info: */
 				module_data_t * mod_info = (module_data_t *)module_load_direct(start, pack_header->region_size);
-				if (mod_info) {
+				if (mod_info)
 					debug_print(NOTICE, "Loaded: %s", mod_info->mod_info->name);
-				}
+
 				pack_header = (struct pack_header *)((uintptr_t)start + pack_header->region_size);
 			}
 			debug_print(NOTICE, "Done with modpack.");
-		} else {
+			break;
+		default:
 			debug_print(NOTICE, "Loading initrd: 0x%x:0x%x", module_start, module_end);
 			initrd_mount(module_start, module_size);
+			break;
 		}
 	}
 }
 
 void init_kernel(struct multiboot *mboot, uint32_t mboot_magic, uintptr_t esp){
 	/* Check if multiboot is set */
-	assert(mboot_magic == MULTIBOOT_EAX_MAGIC && "Didn't boot with multiboot, not sure how we got here.");
+	assert(mboot_magic == MULTIBOOT_EAX_MAGIC && "ERROR: a multiboot specification is not being used. Cannot proceed booting the kernel.");
 
 	/* Set up critical boot time global variables: */
 	initial_esp = esp;
-	mboot_ptr = mboot;
+	mboot_ptr 	= mboot;
 
 	/* Initialize core modules */
-	gdt_install(); /* Global Descriptor Table	 	(GDT) 	*/
-	idt_install(); /* Interrupt Descriptor Table 	(IDT) 	*/
-	isr_install(); /* Interrupt Service Requests 	(ISR) 	*/
-	irq_install(); /* Hardware Interrupt Requests 	(IRQ)	*/
+	gdt_install(); /* 	Global Descriptor Table	 	(GDT) */
+	idt_install(); /* 	Interrupt Descriptor Table 	(IDT) */
+	isr_install(); /* 	Interrupt Service Requests 	(ISR) */
+	irq_install(); /* 	Hardware Interrupt Requests (IRQ) */
 
 	/* Move the stack's position due to the fact GRUB/QEMU might load some modules into RAM */
 	move_stack_because_modules(mboot);
 
 	/* Set up paging: */
 	paging_install(mboot_ptr->mem_upper + mboot_ptr->mem_lower);
-	paging_parse(); /* Check how it is */
-	paging_finalize(); /* Looking good! Finish him! */
-
-	/* Setup command line that is used for initialization during launching of QEMU */
-	char * cmdline = setup_cmdline();
+	paging_parse(); 	/* Check how it is */
+	paging_finalize(); 	/* Looking good! Finish him! */
 
 	/* Install Kernel Heap! (by setting the heap_end variable to the already set placement_pointer) */
 	heap_install();
 
-	/* Now the heap is ready, you can parse the command line provided during QEMU's launch */
-	setup_cmdline_finalize(cmdline);
+	/* Setup command line that is used for initialization during launching of QEMU */
+	setup_cmdline_finalize(setup_cmdline());
 
 	/* Now that the memory and paging is set up, install the most abstract features of this kernel! */
 	vfs_install();		/* Virtual File System! 			*/
@@ -194,10 +199,10 @@ void init_kernel(struct multiboot *mboot, uint32_t mboot_magic, uintptr_t esp){
 	 * then we'll be on our way to userpace on /bin/init!
 	 */
 
-	/* Map /dev to a device mapper so we can set root there (and also other devices) */
+	/* Map /dev to a device mapper so we can set root there (and also other devices like null and initrd) */
 	map_vfs_directory("/dev");
 
-	/* Grab start arguments provided by QEMU/GRUB: (if it's QEMU then the argument is in --append="..." while launching the script) */
+	/* Grab start arguments provided by QEMU/GRUB: (if it's QEMU then the argument is in -append "..." while launching the script) */
 
 	/* Use QEMU's arguments for setting root here: */
 	if (args_present("root"))
@@ -219,7 +224,8 @@ void init_kernel(struct multiboot *mboot, uint32_t mboot_magic, uintptr_t esp){
 
 	/*
 	 * At this point, root should be set up somewhere, preferably on /dev/hda,
-	 * if not, you dun' goof'd on the --append='...' argument on QEMU, better fix it son.
+	 * if not, you dun' goof'd on the -append '...' argument on QEMU, better fix it son.
+	 * tip: -append 'root=/dev/hda'
 	 */
 	if (!fs_root) {
 		debug_print(CRITICAL, "No root filesystem is mounted. Skipping init.");
@@ -246,10 +252,7 @@ int kmain(struct multiboot *mboot, uint32_t mboot_magic, uintptr_t esp) {
 	init_kernel(mboot, mboot_magic, esp);
 
 	/* Prepare to run /bin/init */
-	char * argv[] = {
-		"/bin/init", /* Init program */
-		boot_arg 	 /* Pass in the parsed arguments */
-	};
+	char * argv[] = { "/bin/init" /* Init program */ , boot_arg  /* Pass in the parsed arguments */ };
 
 	/* Run init / OS! */
 	system(argv[0], count_argc(argv), argv);
