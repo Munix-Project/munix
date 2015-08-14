@@ -26,3 +26,5 @@
 /vgalog.ko
 /xtest.ko
 /zero.ko
+/null.ko
+/usbhci.ko
