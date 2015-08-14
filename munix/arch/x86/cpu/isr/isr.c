@@ -5,8 +5,8 @@
  *      Author: miguel
  */
 #include <system.h>
-#include <logging.h>
 #include <module.h>
+#include <logging.h>
 #include <printf.h>
 
 /* The count is treated as is when setting up IDT gates. However there is an
@@ -40,9 +40,8 @@ void isr_install(void) {
 	isrs[ISR_COUNT].index = SYSCALL_VECTOR;
 	isrs[ISR_COUNT].stub = symbol_find("_isr127");
 
-	for (int i = 0; i < ISR_COUNT + 1; i++) {
+	for (int i = 0; i < ISR_COUNT + 1; i++)
 		idt_set_gate(isrs[i].index, isrs[i].stub, 0x08, 0x8E);
-	}
 }
 
 static const char *exception_messages[32] = {

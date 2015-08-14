@@ -5,9 +5,7 @@
  *      Author: miguel
  */
 #include <system.h>
-#include <logging.h>
 #include <module.h>
-#include <printf.h>
 
 /* Programmable interrupt controller */
 #define PIC1           0x20
@@ -54,21 +52,18 @@ void int_disable(void) {
 	SYNC_CLI();
 
 	/* If interrupts were enabled, then this is the first call depth */
-	if (flags & (1 << 9)) {
+	if (flags & (1 << 9))
 		sync_depth = 1;
-	} else {
-		/* Otherwise there is now an additional call depth */
+	else /* Otherwise there is now an additional call depth */
 		sync_depth++;
-	}
 }
 
 void int_resume(void) {
 	/* If there is one or no call depths, reenable interrupts */
-	if (sync_depth == 0 || sync_depth == 1) {
+	if (sync_depth == 0 || sync_depth == 1)
 		SYNC_STI();
-	} else {
+	else
 		sync_depth--;
-	}
 }
 
 void int_enable(void) {
@@ -122,9 +117,8 @@ static void irq_remap(void) {
 }
 
 static void irq_setup_gates(void) {
-	for (size_t i = 0; i < IRQ_CHAIN_SIZE; i++) {
+	for (size_t i = 0; i < IRQ_CHAIN_SIZE; i++)
 		idt_set_gate(32 + i, irqs[i], 0x08, 0x8E);
-	}
 }
 
 void irq_install(void) {
@@ -138,9 +132,8 @@ void irq_install(void) {
 }
 
 void irq_ack(size_t irq_no) {
-	if (irq_no >= 8) {
+	if (irq_no >= 8)
 		outportb(PIC2_COMMAND, PIC_EOI);
-	}
 	outportb(PIC1_COMMAND, PIC_EOI);
 }
 
@@ -150,9 +143,8 @@ void irq_handler(struct regs *r) {
 	if (r->int_no <= 47 && r->int_no >= 32) {
 		for (size_t i = 0; i < IRQ_CHAIN_DEPTH; i++) {
 			irq_handler_chain_t handler = irq_routines[i * IRQ_CHAIN_SIZE + (r->int_no - 32)];
-			if (handler && handler(r)) {
+			if (handler && handler(r))
 				goto done;
-			}
 		}
 		irq_ack(r->int_no - 32);
 	}

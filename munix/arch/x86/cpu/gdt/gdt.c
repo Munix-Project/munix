@@ -5,8 +5,6 @@
  *      Author: miguel
  */
 #include <system.h>
-#include <logging.h>
-#include <libc.h>
 #include <tss.h>
 
 typedef struct {

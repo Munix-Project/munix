@@ -1,10 +1,4 @@
-/*
- * symbols.S
- *
- *  Created on: Aug 13, 2015
- *      Author: miguel
- */
- .section .symbols
+.section .symbols
 
 .extern PciClassCodeTable
 .type PciClassCodeTable, @function
@@ -258,6 +252,9 @@
 .extern bss
 .type bss, @function
 
+.extern c_messages
+.type c_messages, @function
+
 .extern calloc
 .type calloc, @function
 
@@ -311,6 +308,9 @@
 
 .extern copy_page_physical
 .type copy_page_physical, @function
+
+.extern count_argc
+.type count_argc, @function
 
 .extern create_file_fs
 .type create_file_fs, @function
@@ -543,11 +543,20 @@
 .extern init_fpu
 .type init_fpu, @function
 
+.extern init_kernel
+.type init_kernel, @function
+
 .extern initial_esp
 .type initial_esp, @function
 
 .extern initialize_process_tree
 .type initialize_process_tree, @function
+
+.extern initrd_disk
+.type initrd_disk, @function
+
+.extern initrd_mount
+.type initrd_mount, @function
 
 .extern inportb
 .type inportb, @function
@@ -720,6 +729,9 @@
 .extern list_remove
 .type list_remove, @function
 
+.extern load_grub_modules
+.type load_grub_modules, @function
+
 .extern make_pipe
 .type make_pipe, @function
 
@@ -737,6 +749,12 @@
 
 .extern map_vfs_directory
 .type map_vfs_directory, @function
+
+.extern mboot_mods
+.type mboot_mods, @function
+
+.extern mboot_mods_count
+.type mboot_mods_count, @function
 
 .extern mboot_ptr
 .type mboot_ptr, @function
@@ -792,6 +810,9 @@
 .extern modules_install
 .type modules_install, @function
 
+.extern move_stack_because_modules
+.type move_stack_because_modules, @function
+
 .extern next_pid
 .type next_pid, @function
 
@@ -842,6 +863,9 @@
 
 .extern paging_mark_system
 .type paging_mark_system, @function
+
+.extern paging_parse
+.type paging_parse, @function
 
 .extern pci_device_lookup
 .type pci_device_lookup, @function
@@ -951,11 +975,8 @@
 .extern pty_slave_create
 .type pty_slave_create, @function
 
-.extern initrd
-.type initrd, @function
-
-.extern initrd_mount
-.type initrd_mount, @function
+.extern putc
+.type putc, @function
 
 .extern read_cmos
 .type read_cmos, @function
@@ -1064,6 +1085,9 @@
 
 .extern set_process_environment
 .type set_process_environment, @function
+
+.extern setup_cmdline
+.type setup_cmdline, @function
 
 .extern shm_install
 .type shm_install, @function
@@ -1581,6 +1605,9 @@ kernel_symbols_start:
 .long bss
 .asciz "bss"
 
+.long c_messages
+.asciz "c_messages"
+
 .long calloc
 .asciz "calloc"
 
@@ -1634,6 +1661,9 @@ kernel_symbols_start:
 
 .long copy_page_physical
 .asciz "copy_page_physical"
+
+.long count_argc
+.asciz "count_argc"
 
 .long create_file_fs
 .asciz "create_file_fs"
@@ -1866,11 +1896,20 @@ kernel_symbols_start:
 .long init_fpu
 .asciz "init_fpu"
 
+.long init_kernel
+.asciz "init_kernel"
+
 .long initial_esp
 .asciz "initial_esp"
 
 .long initialize_process_tree
 .asciz "initialize_process_tree"
+
+.long initrd_disk
+.asciz "initrd_disk"
+
+.long initrd_mount
+.asciz "initrd_mount"
 
 .long inportb
 .asciz "inportb"
@@ -1930,13 +1969,13 @@ kernel_symbols_start:
 .asciz "isdeadly"
 
 .long isr_install
-.asciz "isrs_install"
+.asciz "isr_install"
 
 .long isr_install_handler
-.asciz "isrs_install_handler"
+.asciz "isr_install_handler"
 
 .long isr_uninstall_handler
-.asciz "isrs_uninstall_handler"
+.asciz "isr_uninstall_handler"
 
 .long kernel_args_map
 .asciz "kernel_args_map"
@@ -2043,6 +2082,9 @@ kernel_symbols_start:
 .long list_remove
 .asciz "list_remove"
 
+.long load_grub_modules
+.asciz "load_grub_modules"
+
 .long make_pipe
 .asciz "make_pipe"
 
@@ -2060,6 +2102,12 @@ kernel_symbols_start:
 
 .long map_vfs_directory
 .asciz "map_vfs_directory"
+
+.long mboot_mods
+.asciz "mboot_mods"
+
+.long mboot_mods_count
+.asciz "mboot_mods_count"
 
 .long mboot_ptr
 .asciz "mboot_ptr"
@@ -2115,6 +2163,9 @@ kernel_symbols_start:
 .long modules_install
 .asciz "modules_install"
 
+.long move_stack_because_modules
+.asciz "move_stack_because_modules"
+
 .long next_pid
 .asciz "next_pid"
 
@@ -2165,6 +2216,9 @@ kernel_symbols_start:
 
 .long paging_mark_system
 .asciz "paging_mark_system"
+
+.long paging_parse
+.asciz "paging_parse"
 
 .long pci_device_lookup
 .asciz "pci_device_lookup"
@@ -2274,11 +2328,8 @@ kernel_symbols_start:
 .long pty_slave_create
 .asciz "pty_slave_create"
 
-.long initrd_disk
-.asciz "initrd_disk"
-
-.long initrd_mount
-.asciz "initrd_mount"
+.long putc
+.asciz "putc"
 
 .long read_cmos
 .asciz "read_cmos"
@@ -2387,6 +2438,9 @@ kernel_symbols_start:
 
 .long set_process_environment
 .asciz "set_process_environment"
+
+.long setup_cmdline
+.asciz "setup_cmdline"
 
 .long shm_install
 .asciz "shm_install"

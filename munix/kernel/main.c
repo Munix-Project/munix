@@ -62,46 +62,34 @@ struct pack_header {
 
 void move_stack_because_modules(struct multiboot *mboot){
 	if (mboot_ptr->flags & (1 << 3)) {
-			debug_print(NOTICE, "There %s %d module%s starting at 0x%x.", mboot_ptr->mods_count == 1 ? "is" : "are", mboot_ptr->mods_count, mboot_ptr->mods_count == 1 ? "" : "s", mboot_ptr->mods_addr);
-			debug_print(NOTICE, "Current kernel heap start point would be 0x%x.", &end);
-			if (mboot_ptr->mods_count > 0) {
-				uintptr_t last_mod = (uintptr_t)&end;
+		mboot_mods_count = mboot_ptr->mods_count;
 
-				mboot_mods = (mboot_mod_t *)mboot_ptr->mods_addr;
-				mboot_mods_count = mboot_ptr->mods_count;
+		debug_print(NOTICE, "There %s %d module%s starting at 0x%x.", mboot_mods_count == 1 ? "is" : "are", mboot_mods_count, mboot_mods_count == 1 ? "" : "s", mboot_ptr->mods_addr);
+		debug_print(NOTICE, "Current kernel heap start point would be 0x%x.", &end);
+		if (mboot_mods_count > 0) {
+			uintptr_t last_mod = (uintptr_t)&end;
 
-				for (uint32_t i = 0; i < mboot_ptr->mods_count; ++i ) {
-					mboot_mod_t * mod = &mboot_mods[i];
-					uint32_t module_start = mod->mod_start;
-					uint32_t module_end   = mod->mod_end;
-					if ((uintptr_t)mod + sizeof(mboot_mod_t) > last_mod) {
-						/* Just in case some silly person put this *behind* the modules... */
-						last_mod = (uintptr_t)mod + sizeof(mboot_mod_t);
-					}
-					debug_print(NOTICE, "Module %d is at 0x%x:0x%x", i, module_start, module_end);
-					if (last_mod < module_end) {
-						last_mod = module_end;
-					}
+			mboot_mods = (mboot_mod_t *)mboot_ptr->mods_addr;
+
+			for (uint32_t i = 0; i < mboot_mods_count; ++i ) {
+				mboot_mod_t * mod = &mboot_mods[i];
+				uint32_t module_start = mod->mod_start;
+				uint32_t module_end   = mod->mod_end;
+				if ((uintptr_t)mod + sizeof(mboot_mod_t) > last_mod) {
+					/* Just in case some silly person put this *behind* the modules... */
+					last_mod = (uintptr_t)mod + sizeof(mboot_mod_t);
 				}
-				debug_print(NOTICE, "Moving kernel heap start to 0x%x", last_mod);
-				kmalloc_startat(last_mod);
+				debug_print(NOTICE, "Module %d is at 0x%x:0x%x", i, module_start, module_end);
+				if (last_mod < module_end)
+					last_mod = module_end;
 			}
+			debug_print(NOTICE, "Moving kernel heap start to 0x%x", last_mod);
+			kmalloc_startat(last_mod);
 		}
+	}
 }
 
-char* setup_cmdline() {
-	char cmdline_buffer[1024], * cmdline;
-
-	size_t len = strlen((char *)mboot_ptr->cmdline) + 1;
-	memmove(cmdline_buffer, (char *)mboot_ptr->cmdline, len);
-
-	/* Relocate the command line */
-	cmdline = (char *)kmalloc(len);
-	memcpy(cmdline, cmdline_buffer, len);
-	return cmdline;
-}
-
-void setup_cmdline_finalize(char* cmdline) {
+void setup_cmdline(void* cmdline) {
 	if (cmdline)
 		args_parse(cmdline);
 }
@@ -179,16 +167,16 @@ void init_kernel(struct multiboot *mboot, uint32_t mboot_magic, uintptr_t esp){
 	heap_install();
 
 	/* Setup command line that is used for initialization during launching of QEMU */
-	setup_cmdline_finalize(setup_cmdline());
+	setup_cmdline((void*)mboot_ptr->cmdline);
 
 	/* Now that the memory and paging is set up, install the most abstract features of this kernel! */
-	vfs_install();		/* Virtual File System! 			*/
-	tasking_install();  /* Multi-tasking! 					*/
-	timer_install();    /* PIT driver 						*/
-	fpu_install();      /* FPU/SSE 							*/
-	syscalls_install(); /* Install the system calls vector 	*/
-	shm_install();      /* Install shared memory 			*/
-	modules_install();  /* Modules! 						*/
+	vfs_install();		/* 		Virtual File System! 			*/
+	tasking_install();  /* 		Multi-tasking! 					*/
+	timer_install();    /* 		PIT driver 						*/
+	fpu_install();      /* 		FPU/SSE 						*/
+	syscalls_install(); /* 		Install the system calls vector */
+	shm_install();      /* 		Install shared memory 			*/
+	modules_install();  /* 		Modules! 						*/
 
 	/* Load modules from bootloader */
 	debug_print(NOTICE, "%d modules to load", mboot_mods_count);

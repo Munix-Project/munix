@@ -6,8 +6,6 @@
  */
 
 #include <system.h>
-#include <libc.h>
-#include <logging.h>
 
 typedef struct {
 	uint16_t base_low;
