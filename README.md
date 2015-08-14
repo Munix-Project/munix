@@ -5,7 +5,7 @@ Miguel's UNIX Kernel (μnix)
 
 **Questions**
 -------------
-Some people might think the same of ToaruOS, so I'll answer the question "**Is this a Linux Distribution?**"
+1) Some people might think the same of ToaruOS, so I'll answer the question: **Is this a Linux Distribution?**
 
 I'd agree that Kevin would answer the same way as me: **NO**. It was made by him and his contributors from scratch. No linux nor unix whatsoever.
 
