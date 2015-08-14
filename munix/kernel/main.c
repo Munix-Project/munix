@@ -51,125 +51,64 @@
 
 uintptr_t initial_esp = 0;
 
-fs_node_t * ramdisk_mount(uintptr_t, size_t);
+uint32_t mboot_mods_count = 0;
+mboot_mod_t * mboot_mods = NULL;
 
-#ifdef EARLY_BOOT_LOG
-#define EARLY_LOG_DEVICE 0x3F8
-static uint32_t _early_log_write(fs_node_t *node, uint32_t offset, uint32_t size, uint8_t *buffer) {
-	for (unsigned int i = 0; i < size; ++i) {
-		outportb(EARLY_LOG_DEVICE, buffer[i]);
-	}
-	return size;
-}
-fs_node_t _early_log = { .write = &_early_log_write };
-#define ENABLE_EARLY_BOOT_LOG(level) do { debug_file = &_early_log; debug_level = (level); } while (0)
-#define DISABLE_EARLY_BOOT_LOG() do { debug_file = NULL; debug_level = NOTICE; } while (0)
-#else
-#define ENABLE_EARLY_BOOT_LOG(level)
-#define DISABLE_EARLY_BOOT_LOG()
-#endif
+fs_node_t * initrd_mount(uintptr_t, size_t);
 
 struct pack_header {
 	char     head[4];
 	uint32_t region_size;
 };
 
-/*
- * multiboot i386 (pc) kernel entry point
- */
-int kmain(struct multiboot *mboot, uint32_t mboot_mag, uintptr_t esp) {
-	initial_esp = esp;
-	extern char * cmdline;
-
-	uint32_t mboot_mods_count = 0;
-	mboot_mod_t * mboot_mods = NULL;
-	mboot_ptr = mboot;
-
-	ENABLE_EARLY_BOOT_LOG(0);
-
-	assert(mboot_mag == MULTIBOOT_EAX_MAGIC && "Didn't boot with multiboot, not sure how we got here.");
-	debug_print(NOTICE, "Processing Multiboot information.");
-
-	/* Initialize core modules */
-	gdt_install();      /* Global descriptor table */
-	idt_install();      /* IDT */
-	isr_install();     /* Interrupt service requests */
-	irq_install();      /* Hardware interrupt requests */
-
+void move_stack_because_modules(struct multiboot *mboot){
 	if (mboot_ptr->flags & (1 << 3)) {
-		debug_print(NOTICE, "There %s %d module%s starting at 0x%x.", mboot_ptr->mods_count == 1 ? "is" : "are", mboot_ptr->mods_count, mboot_ptr->mods_count == 1 ? "" : "s", mboot_ptr->mods_addr);
-		debug_print(NOTICE, "Current kernel heap start point would be 0x%x.", &end);
-		if (mboot_ptr->mods_count > 0) {
-			uintptr_t last_mod = (uintptr_t)&end;
-			uint32_t i;
-			mboot_mods = (mboot_mod_t *)mboot_ptr->mods_addr;
-			mboot_mods_count = mboot_ptr->mods_count;
-			for (i = 0; i < mboot_ptr->mods_count; ++i ) {
-				mboot_mod_t * mod = &mboot_mods[i];
-				uint32_t module_start = mod->mod_start;
-				uint32_t module_end   = mod->mod_end;
-				if ((uintptr_t)mod + sizeof(mboot_mod_t) > last_mod) {
-					/* Just in case some silly person put this *behind* the modules... */
-					last_mod = (uintptr_t)mod + sizeof(mboot_mod_t);
+			debug_print(NOTICE, "There %s %d module%s starting at 0x%x.", mboot_ptr->mods_count == 1 ? "is" : "are", mboot_ptr->mods_count, mboot_ptr->mods_count == 1 ? "" : "s", mboot_ptr->mods_addr);
+			debug_print(NOTICE, "Current kernel heap start point would be 0x%x.", &end);
+			if (mboot_ptr->mods_count > 0) {
+				uintptr_t last_mod = (uintptr_t)&end;
+
+				mboot_mods = (mboot_mod_t *)mboot_ptr->mods_addr;
+				mboot_mods_count = mboot_ptr->mods_count;
+
+				for (uint32_t i = 0; i < mboot_ptr->mods_count; ++i ) {
+					mboot_mod_t * mod = &mboot_mods[i];
+					uint32_t module_start = mod->mod_start;
+					uint32_t module_end   = mod->mod_end;
+					if ((uintptr_t)mod + sizeof(mboot_mod_t) > last_mod) {
+						/* Just in case some silly person put this *behind* the modules... */
+						last_mod = (uintptr_t)mod + sizeof(mboot_mod_t);
+					}
+					debug_print(NOTICE, "Module %d is at 0x%x:0x%x", i, module_start, module_end);
+					if (last_mod < module_end) {
+						last_mod = module_end;
+					}
 				}
-				debug_print(NOTICE, "Module %d is at 0x%x:0x%x", i, module_start, module_end);
-				if (last_mod < module_end) {
-					last_mod = module_end;
-				}
+				debug_print(NOTICE, "Moving kernel heap start to 0x%x", last_mod);
+				kmalloc_startat(last_mod);
 			}
-			debug_print(NOTICE, "Moving kernel heap start to 0x%x", last_mod);
-			kmalloc_startat(last_mod);
 		}
-	}
+}
 
-	paging_install(mboot_ptr->mem_upper + mboot_ptr->mem_lower);
-	if (mboot_ptr->flags & (1 << 6)) {
-		debug_print(NOTICE, "Parsing memory map.");
-		mboot_memmap_t * mmap = (void *)mboot_ptr->mmap_addr;
-		while ((uintptr_t)mmap < mboot_ptr->mmap_addr + mboot_ptr->mmap_length) {
-			if (mmap->type == 2) {
-				for (unsigned long long int i = 0; i < mmap->length; i += 0x1000) {
-					if (mmap->base_addr + i > 0xFFFFFFFF) break; /* xxx */
-					debug_print(INFO, "Marking 0x%x", (uint32_t)(mmap->base_addr + i));
-					paging_mark_system((mmap->base_addr + i) & 0xFFFFF000);
-				}
-			}
-			mmap = (mboot_memmap_t *) ((uintptr_t)mmap + mmap->size + sizeof(uintptr_t));
-		}
-	}
-	paging_finalize();
+char* setup_cmdline() {
+	char cmdline_buffer[1024], * cmdline;
 
-	{
-		char cmdline_[1024];
+	size_t len = strlen((char *)mboot_ptr->cmdline) + 1;
+	memmove(cmdline_buffer, (char *)mboot_ptr->cmdline, len);
 
-		size_t len = strlen((char *)mboot_ptr->cmdline);
-		memmove(cmdline_, (char *)mboot_ptr->cmdline, len + 1);
+	/* Relocate the command line */
+	cmdline = (char *)kmalloc(len);
+	memcpy(cmdline, cmdline_buffer, len);
+	return cmdline;
+}
 
-		/* Relocate the command line */
-		cmdline = (char *)kmalloc(len + 1);
-		memcpy(cmdline, cmdline_, len + 1);
-	}
-
-	/* Memory management */
-	heap_install();     /* Kernel heap */
-
-	if (cmdline) {
+void setup_cmdline_finalize(char* cmdline) {
+	if (cmdline)
 		args_parse(cmdline);
-	}
+}
 
-	vfs_install();
-	tasking_install();  /* Multi-tasking */
-	timer_install();    /* PIC driver */
-	fpu_install();      /* FPU/SSE magic */
-	syscalls_install(); /* Install the system calls */
-	shm_install();      /* Install shared memory */
-	modules_install();  /* Modules! */
-
-	DISABLE_EARLY_BOOT_LOG();
-
-	/* Load modules from bootloader */
-	debug_print(NOTICE, "%d modules to load", mboot_mods_count);
-
+void load_grub_modules() {
+	// Or, in this case (FOR NOW), QEMU's modules ;)
 	for (unsigned int i = 0; i < mboot_ptr->mods_count; ++i ) {
 		mboot_mod_t * mod = &mboot_mods[i];
 		uint32_t module_start = mod->mod_start;
@@ -201,46 +140,121 @@ int kmain(struct multiboot *mboot, uint32_t mboot_mag, uintptr_t esp) {
 			}
 			debug_print(NOTICE, "Done with modpack.");
 		} else {
-			debug_print(NOTICE, "Loading ramdisk: 0x%x:0x%x", module_start, module_end);
-			ramdisk_mount(module_start, module_size);
+			debug_print(NOTICE, "Loading initrd: 0x%x:0x%x", module_start, module_end);
+			initrd_mount(module_start, module_size);
 		}
 	}
+}
 
-	/* Map /dev to a device mapper */
+void init_kernel(struct multiboot *mboot, uint32_t mboot_magic, uintptr_t esp){
+	/* Check if multiboot is set */
+	assert(mboot_magic == MULTIBOOT_EAX_MAGIC && "Didn't boot with multiboot, not sure how we got here.");
+
+	/* Set up critical boot time global variables: */
+	initial_esp = esp;
+	mboot_ptr = mboot;
+
+	/* Initialize core modules */
+	gdt_install(); /* Global Descriptor Table	 	(GDT) 	*/
+	idt_install(); /* Interrupt Descriptor Table 	(IDT) 	*/
+	isr_install(); /* Interrupt Service Requests 	(ISR) 	*/
+	irq_install(); /* Hardware Interrupt Requests 	(IRQ)	*/
+
+	/* Move the stack's position due to the fact GRUB/QEMU might load some modules into RAM */
+	move_stack_because_modules(mboot);
+
+	/* Set up paging: */
+	paging_install(mboot_ptr->mem_upper + mboot_ptr->mem_lower);
+	paging_parse(); /* Check how it is */
+	paging_finalize(); /* Looking good! Finish him! */
+
+	/* Setup command line that is used for initialization during launching of QEMU */
+	char * cmdline = setup_cmdline();
+
+	/* Install Kernel Heap! (by setting the heap_end variable to the already set placement_pointer) */
+	heap_install();
+
+	/* Now the heap is ready, you can parse the command line provided during QEMU's launch */
+	setup_cmdline_finalize(cmdline);
+
+	/* Now that the memory and paging is set up, install the most abstract features of this kernel! */
+	vfs_install();		/* Virtual File System! 			*/
+	tasking_install();  /* Multi-tasking! 					*/
+	timer_install();    /* PIT driver 						*/
+	fpu_install();      /* FPU/SSE 							*/
+	syscalls_install(); /* Install the system calls vector 	*/
+	shm_install();      /* Install shared memory 			*/
+	modules_install();  /* Modules! 						*/
+
+	/* Load modules from bootloader */
+	debug_print(NOTICE, "%d modules to load", mboot_mods_count);
+	load_grub_modules();
+
+	/*
+	 * We're still running? Surprising! All that's left is prepare ourselves for creating basic devices and mounting root,
+	 * then we'll be on our way to userpace on /bin/init!
+	 */
+
+	/* Map /dev to a device mapper so we can set root there (and also other devices) */
 	map_vfs_directory("/dev");
 
-	if (args_present("root")) {
-		vfs_mount_type("ext2", args_value("root"), "/");
-	}
+	/* Grab start arguments provided by QEMU/GRUB: (if it's QEMU then the argument is in --append="..." while launching the script) */
 
+	/* Use QEMU's arguments for setting root here: */
+	if (args_present("root"))
+		vfs_mount_type("ext2", args_value("root"), "/"); /* Use the good ol' ext2 :) We might use more in the future (MIGHT!...) */
+
+	/* And here for the argument 'start': */
 	if (args_present("start")) {
+		/* Grab what start argument you passed on, you better not screw up this on QEMU launch script my good sir... */
 		char * c = args_value("start");
 		if (!c) {
+			/* Really? Did you just pass on start= ? Just that? Why are you even trying to run this kernel then? */
 			debug_print(WARNING, "Expected an argument to kernel option `start`. Ignoring.");
 		} else {
+			/* Good! You did it! */
 			debug_print(NOTICE, "Got start argument: %s", c);
-			boot_arg = strdup(c);
+			boot_arg = strdup(c); /* We're passing this variable for initialization of the OS */
 		}
 	}
 
+	/*
+	 * At this point, root should be set up somewhere, preferably on /dev/hda,
+	 * if not, you dun' goof'd on the --append='...' argument on QEMU, better fix it son.
+	 */
 	if (!fs_root) {
 		debug_print(CRITICAL, "No root filesystem is mounted. Skipping init.");
 		map_vfs_directory("/");
 		switch_task(0);
 	}
 
+	debug_print(NOTICE, "System Successfully Initialized!");
+	debug_print(NORMAL,""); // new line
+	// Yes! All is done and well! Congratulations!
+}
+
+int count_argc(char* argv[]){
+	int argc = 0;
+	while (argv[argc]) argc++;
+	return argc;
+}
+
+/*
+ * multiboot i386 (pc) kernel entry point run by 'kernel_boot.S' on start
+ */
+int kmain(struct multiboot *mboot, uint32_t mboot_magic, uintptr_t esp) {
+	/* Initialize the system completely! */
+	init_kernel(mboot, mboot_magic, esp);
+
 	/* Prepare to run /bin/init */
 	char * argv[] = {
-		"/bin/init",
-		boot_arg,
-		NULL
+		"/bin/init", /* init program */
+		boot_arg /* Pass in the parsed arguments */
 	};
-	int argc = 0;
-	while (argv[argc]) {
-		argc++;
-	}
 
-	system(argv[0], argc, argv); /* Run init */
+	/* Run init / OS! */
+	system(argv[0], count_argc(argv), argv);
 
+	/* The OS exited... That's weird... Are you sure you wanted to do that? */
 	return 0;
 }

@@ -140,6 +140,7 @@ extern void fpu_install(void);
 	extern page_directory_t *current_directory;
 
 	extern void paging_install(uint32_t memsize);
+	extern void paging_parse();
 	extern void paging_prestart(void);
 	extern void paging_finalize(void);
 	extern void paging_mark_system(uint64_t addr);
@@ -198,7 +199,7 @@ extern int send_signal(pid_t process, uint32_t signal);
 #define USER_STACK_TOP    0xB0000000
 #define SHM_START         0xB0000000
 
-/* Tasks */
+/* Tasking */
 extern uintptr_t read_eip(void);
 extern void copy_page_physical(uint32_t, uint32_t);
 extern page_directory_t * clone_directory(page_directory_t * src);
@@ -221,5 +222,7 @@ extern void syscalls_install(void);
 
 extern void validate(void * ptr);
 extern int validate_safe(void * ptr);
+
+extern int system(char * path, int argc, char ** argv);
 
 #endif /* KERNEL_INCLUDE_SYSTEM_H_ */

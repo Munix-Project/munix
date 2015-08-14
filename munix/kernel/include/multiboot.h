@@ -93,7 +93,7 @@ typedef struct {
 
 extern struct multiboot *copy_multiboot(struct multiboot *mboot_ptr);
 extern void dump_multiboot(struct multiboot *mboot_ptr);
-extern char * ramdisk;
+extern char * initrd_disk;
 extern struct multiboot * mboot_ptr;
 
 #endif /* KERNEL_INCLUDE_MULTIBOOT_H_ */

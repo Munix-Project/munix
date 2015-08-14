@@ -951,11 +951,11 @@
 .extern pty_slave_create
 .type pty_slave_create, @function
 
-.extern ramdisk
-.type ramdisk, @function
+.extern initrd
+.type initrd, @function
 
-.extern ramdisk_mount
-.type ramdisk_mount, @function
+.extern initrd_mount
+.type initrd_mount, @function
 
 .extern read_cmos
 .type read_cmos, @function
@@ -2274,11 +2274,11 @@ kernel_symbols_start:
 .long pty_slave_create
 .asciz "pty_slave_create"
 
-.long ramdisk
-.asciz "ramdisk"
+.long initrd_disk
+.asciz "initrd_disk"
 
-.long ramdisk_mount
-.asciz "ramdisk_mount"
+.long initrd_mount
+.asciz "initrd_mount"
 
 .long read_cmos
 .asciz "read_cmos"

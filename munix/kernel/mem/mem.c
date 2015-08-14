@@ -6,7 +6,7 @@
  */
 
 #include <mem.h>
-#include <system.h>
+#include <boot.h>
 #include <process.h>
 #include <logging.h>
 #include <signal.h>
@@ -281,6 +281,23 @@ void paging_install(uint32_t memsize) {
 	uintptr_t phys;
 	kernel_directory = (page_directory_t *)kvmalloc_p(sizeof(page_directory_t),&phys);
 	memset(kernel_directory, 0, sizeof(page_directory_t));
+}
+
+void paging_parse(){
+	if (mboot_ptr->flags & (1 << 6)) {
+		debug_print(NOTICE, "Parsing memory map.");
+		mboot_memmap_t * mmap = (void *)mboot_ptr->mmap_addr;
+		while ((uintptr_t)mmap < mboot_ptr->mmap_addr + mboot_ptr->mmap_length) {
+			if (mmap->type == 2) {
+				for (unsigned long long int i = 0; i < mmap->length; i += 0x1000) {
+					if (mmap->base_addr + i > 0xFFFFFFFF) break; /* xxx */
+					debug_print(INFO, "Marking 0x%x", (uint32_t)(mmap->base_addr + i));
+					paging_mark_system((mmap->base_addr + i) & 0xFFFFF000);
+				}
+			}
+			mmap = (mboot_memmap_t *) ((uintptr_t)mmap + mmap->size + sizeof(uintptr_t));
+		}
+	}
 }
 
 void paging_mark_system(uint64_t addr) {

@@ -9,22 +9,17 @@
 #include <logging.h>
 #include <multiboot.h>
 
-char * ramdisk = NULL;
+char * initrd_disk = NULL;
 struct multiboot * mboot_ptr = NULL;
 
 struct multiboot *
-copy_multiboot(
-		struct multiboot *mboot_ptr
-		) {
+copy_multiboot(struct multiboot *mboot_ptr) {
 	struct multiboot *new_header = (struct multiboot *)kmalloc(sizeof(struct multiboot));
 	memcpy(new_header, mboot_ptr, sizeof(struct multiboot));
 	return new_header;
 }
 
-void
-dump_multiboot(
-		struct multiboot *mboot_ptr
-		) {
+void dump_multiboot(struct multiboot *mboot_ptr) {
 	debug_print(INFO, "MULTIBOOT header at 0x%x:", (uintptr_t)mboot_ptr);
 	debug_print(INFO, "Flags : 0x%x", mboot_ptr->flags);
 	debug_print(INFO, "Mem Lo: 0x%x", mboot_ptr->mem_lower);
