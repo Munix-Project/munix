@@ -223,6 +223,8 @@ extern void syscalls_install(void);
 extern void validate(void * ptr);
 extern int validate_safe(void * ptr);
 
+extern fs_node_t * initrd_mount(uintptr_t, size_t);
+
 extern int system(char * path, int argc, char ** argv);
 
 #endif /* KERNEL_INCLUDE_SYSTEM_H_ */

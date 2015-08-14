@@ -49,13 +49,12 @@
 #include <args.h>
 #include <module.h>
 
+/* Initial esp value that is loaded right from the beginning and is used for memory */
 uintptr_t initial_esp = 0;
 
+/* Module's global variables: */
 uint32_t mboot_mods_count = 0;
 mboot_mod_t * mboot_mods = NULL;
-
-fs_node_t * initrd_mount(uintptr_t, size_t);
-
 struct pack_header {
 	char     head[4];
 	uint32_t region_size;
@@ -248,8 +247,8 @@ int kmain(struct multiboot *mboot, uint32_t mboot_magic, uintptr_t esp) {
 
 	/* Prepare to run /bin/init */
 	char * argv[] = {
-		"/bin/init", /* init program */
-		boot_arg /* Pass in the parsed arguments */
+		"/bin/init", /* Init program */
+		boot_arg 	 /* Pass in the parsed arguments */
 	};
 
 	/* Run init / OS! */
