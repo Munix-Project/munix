@@ -30,12 +30,9 @@ static void keyboard_wait(void) {
  * Keyboard interrupt callback
  */
 static int keyboard_handler(struct regs *r) {
-	unsigned char scancode;
 	keyboard_wait();
-	scancode = inportb(KEY_DEVICE);
+	write_fs(keyboard_pipe, 0, 1, (uint8_t []){inportb(KEY_DEVICE)});
 	irq_ack(KEY_IRQ);
-
-	write_fs(keyboard_pipe, 0, 1, (uint8_t []){scancode});
 	return 1;
 }
 
@@ -44,7 +41,6 @@ static int keyboard_handler(struct regs *r) {
  * pipe device for userspace.
  */
 static int keyboard_install(void) {
-	log_clrscr();
 	debug_print(NOTICE, "Initializing PS/2 keyboard driver");
 
 	/* Create a device pipe */

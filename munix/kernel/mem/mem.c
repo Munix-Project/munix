@@ -16,6 +16,7 @@
 #define KERNEL_HEAP_INIT 0x00800000
 #define KERNEL_HEAP_END  0x20000000
 
+/* end can be found on the linker.ld */
 extern void *end;
 uintptr_t placement_pointer = (uintptr_t)&end;
 uintptr_t heap_end = (uintptr_t)NULL;
@@ -35,11 +36,11 @@ void kmalloc_startat(uintptr_t address) {
 uintptr_t kmalloc_real(size_t size, int align, uintptr_t * phys) {
 	if (heap_end) {
 		void * address;
-		if (align) {
+		if (align)
 			address = valloc(size);
-		} else {
+		else
 			address = malloc(size);
-		}
+
 		if (phys) {
 			if (align && size >= 0x3000) {
 				debug_print(NOTICE, "Requested large aligned alloc of size 0x%x", size);
@@ -69,9 +70,9 @@ uintptr_t kmalloc_real(size_t size, int align, uintptr_t * phys) {
 		placement_pointer &= 0xFFFFF000;
 		placement_pointer += 0x1000;
 	}
-	if (phys) {
+	if (phys)
 		*phys = placement_pointer;
-	}
+
 	uintptr_t address = placement_pointer;
 	placement_pointer += size;
 	return (uintptr_t)address;
@@ -226,13 +227,8 @@ alloc_frame(
 	}
 }
 
-void
-dma_frame(
-		page_t *page,
-		int is_kernel,
-		int is_writeable,
-		uintptr_t address
-		) {
+/* Allows creation of frames for paging */
+void dma_frame(page_t *page, int is_kernel, int is_writeable, uintptr_t address) {
 	/* Page this address directly */
 	page->present = 1;
 	page->rw      = (is_writeable) ? 1 : 0;
@@ -241,10 +237,7 @@ dma_frame(
 	set_frame(address);
 }
 
-void
-free_frame(
-		page_t *page
-		) {
+void free_frame(page_t *page) {
 	uint32_t frame;
 	if (!(frame = page->frame)) {
 		assert(0);
@@ -325,7 +318,8 @@ void paging_finalize(void) {
 	for (uintptr_t j = 0xb8000; j < 0xc0000; j += 0x1000) {
 		dma_frame(get_page(j, 0, kernel_directory), 0, 1, j);
 	}
-	isr_install_handler(14, page_fault);
+
+	isr_install_handler(ISR_PAGEFAULT, page_fault);
 	kernel_directory->physical_address = (uintptr_t)kernel_directory->physical_tables;
 
 	uintptr_t tmp_heap_start = KERNEL_HEAP_INIT;
@@ -359,9 +353,8 @@ uintptr_t map_to_physical(uintptr_t virtual) {
 	if (current_directory->tables[table]) {
 		page_t * p = &current_directory->tables[table]->pages[subframe];
 		return p->frame * 0x1000 + remaining;
-	} else {
+	} else
 		return 0;
-	}
 }
 
 void debug_print_directory(page_directory_t * arg) {
@@ -371,6 +364,7 @@ void debug_print_directory(page_directory_t * arg) {
 		if (!current_directory->tables[i] || (uintptr_t)current_directory->tables[i] == (uintptr_t)0xFFFFFFFF) {
 			continue;
 		}
+
 		if (kernel_directory->tables[i] == current_directory->tables[i]) {
 			debug_print(INSANE, "  0x%x - kern [0x%x/0x%x] 0x%x", current_directory->tables[i], &current_directory->tables[i], &kernel_directory->tables[i], i * 0x1000 * 1024);
 			for (uint16_t j = 0; j < 1024; ++j) {
@@ -396,10 +390,7 @@ void debug_print_directory(page_directory_t * arg) {
 	debug_print(INFO, " ---- [done]");
 }
 
-void
-switch_page_directory(
-		page_directory_t * dir
-		) {
+void switch_page_directory(page_directory_t * dir) {
 	current_directory = dir;
 	asm volatile (
 			"mov %0, %%cr3\n"
@@ -424,12 +415,7 @@ void invalidate_tables_at(uintptr_t addr) {
 			:: "r"(addr) : "%eax");
 }
 
-page_t *
-get_page(
-		uintptr_t address,
-		int make,
-		page_directory_t * dir
-		) {
+page_t * get_page(uintptr_t address, int make, page_directory_t * dir) {
 	address /= 0x1000;
 	uint32_t table_index = address / 1024;
 	if (dir->tables[table_index]) {
@@ -449,12 +435,7 @@ void page_fault(struct regs *r)  {
 	uint32_t faulting_address;
 	asm volatile("mov %%cr2, %0" : "=r"(faulting_address));
 
-#ifdef STDOUT_TERM
-	log_clrscr();
-	log_reset();
-#endif
 	debug_print(CRITICAL, "Page fault at address %d", faulting_address);
-
 
 	if (r->eip == SIGNAL_RETURN) {
 		return_from_signal_handler();
@@ -472,7 +453,7 @@ void page_fault(struct regs *r)  {
 
 	debug_print(ERROR, "\033[1;37;41mSegmentation fault. (p:%d,rw:%d,user:%d,res:%d,id:%d) at 0x%x eip: 0x%x pid=%d,%d [%s]\033[0m", present, rw, user, reserved, id, faulting_address, r->eip, current_process->id, current_process->group, current_process->name);
 
-	/*if (r->eip < heap_end) {
+	if (r->eip < heap_end) {
 		// find closest symbol
 		char * closest  = NULL;
 		size_t distance = 0xFFFFFFFF;
@@ -519,7 +500,7 @@ void page_fault(struct regs *r)  {
 
 	} else {
 		debug_print(ERROR, "\033[1;31m(In userspace)\033[0m");
-	}*/
+	}
 
 #endif
 
@@ -543,24 +524,25 @@ void heap_install(void ) {
 }
 
 void * sbrk(uintptr_t increment) {
+	/* Check if we can use sbrk first: */
 	assert((increment % 0x1000 == 0) && "Kernel requested to expand heap by a non-page-multiple value");
 	assert((heap_end % 0x1000 == 0)  && "Kernel heap is not page-aligned!");
 	assert((heap_end + increment <= KERNEL_HEAP_END - 1) && "The kernel has attempted to allocate beyond the end of its heap.");
-	uintptr_t address = heap_end;
+
+	void* address = (void*)heap_end;
 
 	if (heap_end + increment > kernel_heap_alloc_point) {
 		debug_print(INFO, "Hit the end of available kernel heap, going to allocate more (at 0x%x, want to be at 0x%x)", heap_end, heap_end + increment);
-		for (uintptr_t i = heap_end; i < heap_end + increment; i += 0x1000) {
-			//xxx debug_print(INFO, "Allocating frame at 0x%x...", i);
+		for (uintptr_t i = heap_end; i < heap_end + increment; i += 0x1000)
 			alloc_frame(get_page(i, 0, kernel_directory), 1, 0);
-		}
+
 		invalidate_page_tables();
 		debug_print(INFO, "Done.");
 	}
 
 	heap_end += increment;
-	memset((void *)address, 0x0, increment);
-	return (void *)address;
+	memset(address, 0x0, increment);
+	return address;
 }
 
 

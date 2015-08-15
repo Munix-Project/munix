@@ -49,6 +49,8 @@
 #include <args.h>
 #include <module.h>
 
+#define IS_BIT_SET(flag, nth) (1<<nth)
+
 /* Initial esp value that is loaded right from the beginning and is used for memory */
 uintptr_t initial_esp = 0;
 
@@ -61,7 +63,7 @@ struct pack_header {
 };
 
 void move_stack_because_modules(struct multiboot *mboot){
-	if (mboot_ptr->flags & (1 << 3)) {
+	if(IS_BIT_SET(mboot_ptr->flags,3)) {
 		mboot_mods_count = mboot_ptr->mods_count;
 
 		debug_print(NOTICE, "There %s %d module%s starting at 0x%x.", mboot_mods_count == 1 ? "is" : "are", mboot_mods_count, mboot_mods_count == 1 ? "" : "s", mboot_ptr->mods_addr);
@@ -84,7 +86,7 @@ void move_stack_because_modules(struct multiboot *mboot){
 					last_mod = module_end;
 			}
 			debug_print(NOTICE, "Moving kernel heap start to 0x%x", last_mod);
-			kmalloc_startat(last_mod);
+			kmalloc_startat(last_mod); /* Move kernel heap start point to somewhere higher in memory */
 		}
 	}
 }
@@ -95,7 +97,7 @@ void setup_cmdline(void* cmdline) {
 }
 
 void load_grub_modules() {
-	// Or, in this case (FOR NOW), QEMU's modules ;)
+	/* Or, in this case (FOR NOW), QEMU's modules ;) */
 	for (unsigned int i = 0; i < mboot_mods_count; ++i ) {
 		/* Fetch module: */
 		mboot_mod_t *	mod 		 = &mboot_mods[i];
@@ -106,7 +108,7 @@ void load_grub_modules() {
 		/* Handle it: */
 		switch(module_quickcheck((void *)module_start)) { /* Check module 1st */
 		case 1:
-			/* Single Module */
+			/* Load Single Module */
 			debug_print(NOTICE, "Loading a module: 0x%x:0x%x", module_start, module_end);
 			module_data_t * mod_info = (module_data_t *)module_load_direct((void *)(module_start), module_size);
 
@@ -114,7 +116,7 @@ void load_grub_modules() {
 				debug_print(NOTICE, "Loaded: %s", mod_info->mod_info->name);
 			break;
 		case 2:
-			/* Mod pack */
+			/* Load Mod Pack (lots of modules obviously) */
 			debug_print(NOTICE, "Loading modpack. %x", module_start);
 			struct pack_header * pack_header = (struct pack_header *)module_start;
 			while (pack_header->region_size) {
@@ -147,7 +149,7 @@ void init_kernel(struct multiboot *mboot, uint32_t mboot_magic, uintptr_t esp){
 
 	/* Set up critical boot time global variables: */
 	initial_esp = esp;
-	mboot_ptr 	= mboot;
+	mboot_ptr = mboot;
 
 	/* Initialize core modules */
 	gdt_install(); /* 	Global Descriptor Table	 	(GDT) */
@@ -241,7 +243,6 @@ int kmain(struct multiboot *mboot, uint32_t mboot_magic, uintptr_t esp) {
 
 	/* Prepare to run /bin/init */
 	char * argv[] = { "/bin/init" /* Init program */ , boot_arg  /* Pass in the parsed arguments */ };
-
 	/* Run init / OS! */
 	system(argv[0], count_argc(argv), argv);
 

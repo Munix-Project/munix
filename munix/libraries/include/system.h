@@ -15,8 +15,6 @@
 #include <process.h>
 #include <errno_defs.h>
 
-#undef STDOUT_TERM // Output directly to video memory at 0xb8000 or not (undefine it if you don't want any output)
-
 #define STR(x) #x
 #define STRSTR(x) STR(x)
 
@@ -60,6 +58,29 @@ extern void idt_install(void);
 extern void idt_set_gate(uint8_t num, void (*base)(void), uint16_t sel, uint8_t flags);
 
 /* ISR */
+enum ISR_IVT {
+	ISR_DIVBY0,
+	ISR_RESERVED0,
+	ISR_NMI,
+	ISR_BREAK,
+	ISR_OVERFLOW,
+	ISR_BOUNDS,
+	ISR_INVOPCODE,
+	ISR_DEVICEUN,
+	ISR_DOUBLEFAULT,
+	ISR_COPROC,
+	ISR_INVTSS,
+	ISR_SEG_FAULT,
+	ISR_STACKSEG_FAULT,
+	ISR_GENERALPROT,
+	ISR_PAGEFAULT,
+	ISR_RESERVED1,
+	ISR_FPU,
+	ISR_ALIGNCHECK,
+	ISR_SIMD_FPU,
+	ISR_RESERVED2,
+	ISR_USR
+};
 typedef void (*irq_handler_t) (struct regs *);
 typedef int (*irq_handler_chain_t) (struct regs *);
 
@@ -120,44 +141,44 @@ extern void switch_fpu(void);
 extern void fpu_install(void);
 
 /* Memory Management */
-	extern uintptr_t placement_pointer;
-	extern void kmalloc_startat(uintptr_t address);
-	extern uintptr_t kmalloc_real(size_t size, int align, uintptr_t * phys);
-	extern uintptr_t kmalloc(size_t size);
-	extern uintptr_t kvmalloc(size_t size);
-	extern uintptr_t kmalloc_p(size_t size, uintptr_t * phys);
-	extern uintptr_t kvmalloc_p(size_t size, uintptr_t * phys);
-	extern void *sbrk(uintptr_t increment);
-	/* klmalloc */
-	void * __attribute__ ((malloc)) malloc(size_t size);
-	void * __attribute__ ((malloc)) realloc(void *ptr, size_t size);
-	void * __attribute__ ((malloc)) calloc(size_t nmemb, size_t size);
-	void * __attribute__ ((malloc)) valloc(size_t size);
-	void free(void *ptr);
+extern uintptr_t placement_pointer;
+extern void kmalloc_startat(uintptr_t address);
+extern uintptr_t kmalloc_real(size_t size, int align, uintptr_t * phys);
+extern uintptr_t kmalloc(size_t size);
+extern uintptr_t kvmalloc(size_t size);
+extern uintptr_t kmalloc_p(size_t size, uintptr_t * phys);
+extern uintptr_t kvmalloc_p(size_t size, uintptr_t * phys);
+extern void *sbrk(uintptr_t increment);
+/* klmalloc */
+void * __attribute__ ((malloc)) malloc(size_t size);
+void * __attribute__ ((malloc)) realloc(void *ptr, size_t size);
+void * __attribute__ ((malloc)) calloc(size_t nmemb, size_t size);
+void * __attribute__ ((malloc)) valloc(size_t size);
+void free(void *ptr);
 
-	// Page types moved to task.h
-	extern page_directory_t *kernel_directory;
-	extern page_directory_t *current_directory;
+// Page types moved to task.h
+extern page_directory_t *kernel_directory;
+extern page_directory_t *current_directory;
 
-	extern void paging_install(uint32_t memsize);
-	extern void paging_parse();
-	extern void paging_prestart(void);
-	extern void paging_finalize(void);
-	extern void paging_mark_system(uint64_t addr);
-	extern void switch_page_directory(page_directory_t * new);
-	extern void invalidate_page_tables(void);
-	extern void invalidate_tables_at(uintptr_t addr);
-	extern page_t *get_page(uintptr_t address, int make, page_directory_t * dir);
-	extern void page_fault(struct regs *r);
-	extern void dma_frame(page_t * page, int, int, uintptr_t);
-	extern void debug_print_directory(page_directory_t *);
+extern void paging_install(uint32_t memsize);
+extern void paging_parse();
+extern void paging_prestart(void);
+extern void paging_finalize(void);
+extern void paging_mark_system(uint64_t addr);
+extern void switch_page_directory(page_directory_t * new);
+extern void invalidate_page_tables(void);
+extern void invalidate_tables_at(uintptr_t addr);
+extern page_t *get_page(uintptr_t address, int make, page_directory_t * dir);
+extern void page_fault(struct regs *r);
+extern void dma_frame(page_t * page, int, int, uintptr_t);
+extern void debug_print_directory(page_directory_t *);
 
-	void heap_install(void);
+void heap_install(void);
 
-	void alloc_frame(page_t *page, int is_kernel, int is_writeable);
-	void free_frame(page_t *page);
-	uintptr_t memory_use(void);
-	uintptr_t memory_total(void);
+void alloc_frame(page_t *page, int is_kernel, int is_writeable);
+void free_frame(page_t *page);
+uintptr_t memory_use(void);
+uintptr_t memory_total(void);
 
 /* spin.c */
 typedef volatile int spin_lock_t[2];
@@ -200,6 +221,8 @@ extern int send_signal(pid_t process, uint32_t signal);
 #define SHM_START         0xB0000000
 
 /* Tasking */
+#define PUSH(stack, type, item) stack -= sizeof(type); \
+							*((type *) stack) = item
 extern uintptr_t read_eip(void);
 extern void copy_page_physical(uint32_t, uint32_t);
 extern page_directory_t * clone_directory(page_directory_t * src);

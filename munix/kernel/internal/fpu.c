@@ -103,8 +103,8 @@ void switch_fpu(void) {
 
 /* Enable the FPU context handling */
 void fpu_install(void) {
-	isr_install_handler(6, &invalid_op);
-	isr_install_handler(7, &invalid_op);
+	isr_install_handler(ISR_INVOPCODE, &invalid_op);
+	isr_install_handler(ISR_DEVICEUN, &invalid_op);
 }
 
 

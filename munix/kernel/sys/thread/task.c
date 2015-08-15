@@ -14,9 +14,6 @@
 
 uint32_t next_pid = 0;
 
-#define PUSH(stack, type, item) stack -= sizeof(type); \
-							*((type *) stack) = item
-
 page_directory_t *kernel_directory;
 page_directory_t *current_directory;
 
@@ -368,10 +365,9 @@ uint32_t getpid(void) {
  */
 void switch_task(uint8_t reschedule) {
 
-	if (!current_process) {
-		/* Tasking is not yet installed. */
-		return;
-	}
+	/* Tasking is not yet installed. */
+	if (!current_process) return;
+
 	if (!current_process->running) {
 		switch_next();
 	}
@@ -476,25 +472,6 @@ void switch_next(void) {
 			: "%ebx", "%esp", "%eax");
 }
 
-extern void enter_userspace(uintptr_t location, uintptr_t stack);
-
-/*
- * Enter ring 3 and jump to `location`.
- *
- * @param location Address to jump to in user space
- * @param argc     Argument count
- * @param argv     Argument pointers
- * @param stack    Userspace stack address
- */
-void enter_user_jmp(uintptr_t location, int argc, char ** argv, uintptr_t stack) {
-	IRQ_OFF;
-	set_kernel_stack(current_process->image.stack);
-
-	PUSH(stack, uintptr_t, (uintptr_t)argv);
-	PUSH(stack, int, argc);
-	enter_userspace(location, stack);
-}
-
 /*
  * Dequeue the current task and set it as finished
  *
@@ -511,9 +488,8 @@ void task_exit(int retval) {
 
 	process_t * parent = process_get_parent((process_t *)current_process);
 
-	if (parent) {
+	if (parent)
 		wakeup_queue(parent->wait_queue);
-	}
 
 	switch_next();
 }

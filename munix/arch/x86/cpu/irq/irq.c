@@ -6,6 +6,7 @@
  */
 #include <system.h>
 #include <module.h>
+#include <printf.h>
 
 /* Programmable interrupt controller */
 #define PIC1           0x20
@@ -72,19 +73,20 @@ void int_enable(void) {
 }
 
 /* Interrupt Requests */
-#define IRQ_CHAIN_SIZE  16
+#define IRQ_COUNT 16
 #define IRQ_CHAIN_DEPTH 4
+#define IRQ_OFFSET 32
 
-static void (*irqs[IRQ_CHAIN_SIZE])(void);
-static irq_handler_chain_t irq_routines[IRQ_CHAIN_SIZE * IRQ_CHAIN_DEPTH] = { NULL };
+static void (*irqs[IRQ_COUNT])(void);
+static irq_handler_chain_t irq_routines[IRQ_COUNT * IRQ_CHAIN_DEPTH] = { NULL };
 
 void irq_install_handler(size_t irq, irq_handler_chain_t handler) {
 	/* Disable interrupts when changing handlers */
 	SYNC_CLI();
 	for (size_t i = 0; i < IRQ_CHAIN_DEPTH; i++) {
-		if (irq_routines[i * IRQ_CHAIN_SIZE + irq])
+		if (irq_routines[i * IRQ_COUNT + irq])
 			continue;
-		irq_routines[i * IRQ_CHAIN_SIZE + irq] = handler;
+		irq_routines[i * IRQ_COUNT + irq] = handler;
 		break;
 	}
 	SYNC_STI();
@@ -94,7 +96,7 @@ void irq_uninstall_handler(size_t irq) {
 	/* Disable interrupts when changing handlers */
 	SYNC_CLI();
 	for (size_t i = 0; i < IRQ_CHAIN_DEPTH; i++)
-		irq_routines[i * IRQ_CHAIN_SIZE + irq] = NULL;
+		irq_routines[i * IRQ_COUNT + irq] = NULL;
 	SYNC_STI();
 }
 
@@ -117,13 +119,13 @@ static void irq_remap(void) {
 }
 
 static void irq_setup_gates(void) {
-	for (size_t i = 0; i < IRQ_CHAIN_SIZE; i++)
-		idt_set_gate(32 + i, irqs[i], 0x08, 0x8E);
+	for (size_t i = 0; i < IRQ_COUNT; i++)
+		idt_set_gate(IRQ_OFFSET + i, irqs[i], 0x08, 0x8E);
 }
 
 void irq_install(void) {
 	char buffer[16];
-	for (int i = 0; i < IRQ_CHAIN_SIZE; i++) {
+	for (int i = 0; i < IRQ_COUNT; i++) {
 		sprintf(buffer, "_irq%d", i);
 		irqs[i] = symbol_find(buffer);
 	}
@@ -137,16 +139,21 @@ void irq_ack(size_t irq_no) {
 	outportb(PIC1_COMMAND, PIC_EOI);
 }
 
+int is_irq_valid(unsigned int int_no){
+	return int_no>=IRQ_OFFSET && int_no<=IRQ_OFFSET+(IRQ_COUNT-1); // IRQ_COUNT - 1 because it starts from 0
+}
+
 void irq_handler(struct regs *r) {
 	/* Disable interrupts when handling */
 	int_disable();
-	if (r->int_no <= 47 && r->int_no >= 32) {
+	if (is_irq_valid(r->int_no)) {
 		for (size_t i = 0; i < IRQ_CHAIN_DEPTH; i++) {
-			irq_handler_chain_t handler = irq_routines[i * IRQ_CHAIN_SIZE + (r->int_no - 32)];
+			irq_handler_chain_t handler = irq_routines[i * IRQ_COUNT + (r->int_no - IRQ_OFFSET)];
+			// Check and run irq handler:
 			if (handler && handler(r))
 				goto done;
 		}
-		irq_ack(r->int_no - 32);
+		irq_ack(r->int_no - IRQ_OFFSET);
 	}
 done:
 	int_resume();

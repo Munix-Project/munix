@@ -13,7 +13,7 @@ EMU=qemu-system-i386
 PR=munix_toolchain/modules
 
 # Sort out dependencies in the proper order:
-MODS="serial,procfs,tmpfs,ata,ext2,debug_shell,ps2mouse,ps2kbd,lfbvideo,packetfs,snd,pcspkr,ac97,net,rtl,irc"
+MODS="serial,procfs,tmpfs,ata,ext2,debug_shell,mouse,kbd,lfbvideo,packetfs,snd,pcspkr,ac97,net,rtl,irc"
 MODS=$(echo $MODS | sed "s@ @@g") # Remove empty spaces
 MODS=$(echo $MODS | sed "s@,@.ko,$PR/@g") # Replace commas with the prefix and sufixes
 MODS="$PR/$MODS.ko" # Fix it up by adding the last two pieces

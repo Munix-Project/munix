@@ -32,10 +32,10 @@ enter_userspace:
     mov %edx, %esp
     pushl $MAGIC
 
-    /* Segement selector */
+    /* Segment selector */
     mov $0x23,%ax
 
-    /* Save segement registers */
+    /* Save segment registers */
     mov %eax, %ds
     mov %eax, %es
     mov %eax, %fs

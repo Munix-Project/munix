@@ -612,6 +612,9 @@
 .extern irq_uninstall_handler
 .type irq_uninstall_handler, @function
 
+.extern is_irq_valid
+.type is_irq_valid, @function
+
 .extern isdeadly
 .type isdeadly, @function
 
@@ -1964,6 +1967,9 @@ kernel_symbols_start:
 
 .long irq_uninstall_handler
 .asciz "irq_uninstall_handler"
+
+.long is_irq_valid
+.asciz "is_irq_valid"
 
 .long isdeadly
 .asciz "isdeadly"

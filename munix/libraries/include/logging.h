@@ -8,10 +8,6 @@
 #ifndef KERNEL_INCLUDE_LOGGING_H_
 #define KERNEL_INCLUDE_LOGGING_H_
 
-#ifdef STDOUT_TERM
-extern UPoint cursor;
-#endif
-
 #define log_clrscr() for(unsigned i=0;i<80;i++)\
 	for(unsigned j=0;j<25;j++) \
 		putc(' ',i,j,0b1111);
