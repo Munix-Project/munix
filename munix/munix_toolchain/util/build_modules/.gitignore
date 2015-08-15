@@ -1,4 +1,6 @@
 /build_modules.sh
-/build_modules.sh~
 /makefile
+
+/.gitignore~
+/build_modules.sh~
 /makefile~

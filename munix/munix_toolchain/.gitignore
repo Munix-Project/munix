@@ -1,0 +1,7 @@
+/.gitignore~
+/modules/
+/init/
+/lib/
+/libraries/
+/fs/
+/arch/

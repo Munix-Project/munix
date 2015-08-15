@@ -36,7 +36,6 @@ static int keyboard_handler(struct regs *r) {
 	irq_ack(KEY_IRQ);
 
 	write_fs(keyboard_pipe, 0, 1, (uint8_t []){scancode});
-
 	return 1;
 }
 

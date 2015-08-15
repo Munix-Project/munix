@@ -5,7 +5,6 @@
  *      Author: miguel
  */
 
-
 #include <module.h>
 #include <printf.h>
 #include <pci.h>
