@@ -122,7 +122,7 @@
 #define NUM_BINS 11U								/* Number of bins, total, under 32-bit. */
 #define SMALLEST_BIN_LOG 2U							/* Logarithm base two of the smallest bin: log_2(sizeof(int32)). */
 #define BIG_BIN (NUM_BINS - 1)						/* Index for the big bin, (NUM_BINS - 1) */
-#define SMALLEST_BIN (1UL << SMALLEST_BIN_LOG)		/* Size of the smallest bin. */
+#define SMALLEST_BIN NTH_BIT(SMALLEST_BIN_LOG)		/* Size of the smallest bin. */
 
 #define PAGE_SIZE 0x1000							/* Size of a page (in bytes), should be 4KB */
 #define PAGE_MASK (PAGE_SIZE - 1)					/* Block mask, size of a page * number of pages - 1. */
@@ -917,7 +917,7 @@ static void * __attribute__ ((malloc)) klrealloc(void *ptr, uintptr_t size) {
 		 * we need to get the size of the bin
 		 * from its id.
 		 */
-		old_size = (1UL << (SMALLEST_BIN_LOG + old_size));
+		old_size = NTH_BIT((SMALLEST_BIN_LOG + old_size));
 	}
 
 	/*

@@ -500,7 +500,7 @@ void task_exit(int retval) {
 void kexit(int retval) {
 	task_exit(retval);
 	debug_print(CRITICAL, "Process returned from task_exit! Environment is definitely unclean. Stopping.");
-	STOP;
+	KERNEL_FULL_STOP;
 }
 
 

@@ -134,7 +134,7 @@ set_frame(
 		uint32_t frame  = frame_addr / 0x1000;
 		uint32_t index  = INDEX_FROM_BIT(frame);
 		uint32_t offset = OFFSET_FROM_BIT(frame);
-		frames[index] |= (0x1 << offset);
+		frames[index] |= NTH_BIT(offset);
 	}
 }
 
@@ -145,14 +145,14 @@ clear_frame(
 	uint32_t frame  = frame_addr / 0x1000;
 	uint32_t index  = INDEX_FROM_BIT(frame);
 	uint32_t offset = OFFSET_FROM_BIT(frame);
-	frames[index] &= ~(0x1 << offset);
+	frames[index] &= ~NTH_BIT(offset);
 }
 
 uint32_t test_frame(uintptr_t frame_addr) {
 	uint32_t frame  = frame_addr / 0x1000;
 	uint32_t index  = INDEX_FROM_BIT(frame);
 	uint32_t offset = OFFSET_FROM_BIT(frame);
-	return (frames[index] & (0x1 << offset));
+	return (frames[index] & NTH_BIT(offset));
 }
 
 uint32_t first_n_frames(int n) {
@@ -176,7 +176,7 @@ uint32_t first_frame(void) {
 	for (i = 0; i < INDEX_FROM_BIT(nframes); ++i) {
 		if (frames[i] != 0xFFFFFFFF) {
 			for (j = 0; j < 32; ++j) {
-				uint32_t testFrame = 0x1 << j;
+				uint32_t testFrame = NTH_BIT(j);
 				if (!(frames[i] & testFrame)) {
 					return i * 0x20 + j;
 				}
@@ -198,7 +198,7 @@ uint32_t first_frame(void) {
 	handle_signal((process_t *)current_process, sig);
 #endif
 
-	STOP;
+	KERNEL_FULL_STOP;
 
 	return -1;
 }
@@ -250,15 +250,11 @@ void free_frame(page_t *page) {
 
 uintptr_t memory_use(void ) {
 	uintptr_t ret = 0;
-	uint32_t i, j;
-	for (i = 0; i < INDEX_FROM_BIT(nframes); ++i) {
-		for (j = 0; j < 32; ++j) {
-			uint32_t testFrame = 0x1 << j;
-			if (frames[i] & testFrame) {
+	for (uint32_t i = 0; i < INDEX_FROM_BIT(nframes); ++i)
+		for (uint32_t j = 0; j < 32; ++j)
+			if (frames[i] & NTH_BIT(j))
 				ret++;
-			}
-		}
-	}
+
 	return ret * 4;
 }
 
@@ -277,7 +273,7 @@ void paging_install(uint32_t memsize) {
 }
 
 void paging_parse(){
-	if (mboot_ptr->flags & (1 << 6)) {
+	if (mboot_ptr->flags & NTH_BIT(6)) {
 		debug_print(NOTICE, "Parsing memory map.");
 		mboot_memmap_t * mmap = (void *)mboot_ptr->mmap_addr;
 		while ((uintptr_t)mmap < mboot_ptr->mmap_addr + mboot_ptr->mmap_length) {

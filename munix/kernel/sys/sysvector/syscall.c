@@ -398,7 +398,7 @@ static int sys_reboot(void) {
 			out = inportb(0x64);
 		}
 		outportb(0x64, 0xFE); /* Reset */
-		STOP;
+		KERNEL_FULL_STOP;
 	}
 	return 0;
 }

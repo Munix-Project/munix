@@ -49,8 +49,6 @@
 #include <args.h>
 #include <module.h>
 
-#define IS_BIT_SET(flag, nth) (1<<nth)
-
 /* Initial esp value that is loaded right from the beginning and is used for memory */
 uintptr_t initial_esp = 0;
 

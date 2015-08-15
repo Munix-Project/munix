@@ -181,7 +181,7 @@ void delete_process(process_t * proc) {
 static void _kidle(void) {
 	while (1) {
 		IRQ_ON;
-		PAUSE;
+		KERNEL_PAUSE;
 	}
 }
 

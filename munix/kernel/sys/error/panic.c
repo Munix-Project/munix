@@ -49,6 +49,6 @@ void assert_failed(const char *file, uint32_t line, const char *desc) {
 	// This is our life now
 	while (1) {
 		IRQ_OFF;
-		PAUSE;
+		KERNEL_PAUSE;
 	}
 }

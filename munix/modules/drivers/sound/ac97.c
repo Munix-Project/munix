@@ -5,7 +5,6 @@
  *      Author: miguel
  */
 
-
 #include <logging.h>
 #include <mem.h>
 #include <module.h>
@@ -36,22 +35,22 @@
 #define AC97_BDL_BUFFER_LEN       0x1000                /* Length of buffer in BDL */
 #define AC97_CL_GET_LENGTH(cl)    ((cl) & 0xFFFF)       /* Decode length from cl */
 #define AC97_CL_SET_LENGTH(cl, v) ((cl) = (v) & 0xFFFF) /* Encode length to cl */
-#define AC97_CL_BUP               (1 << 30)             /* Buffer underrun policy in cl */
-#define AC97_CL_IOC               (1 << 31)             /* Interrupt on completion flag in cl */
+#define AC97_CL_BUP               NTH_BIT(30)             /* Buffer underrun policy in cl */
+#define AC97_CL_IOC               NTH_BIT(31)             /* Interrupt on completion flag in cl */
 
 /* PCM out control register flags */
-#define AC97_X_CR_RPBM  (1 << 0)  /* Run/pause bus master */
-#define AC97_X_CR_RR    (1 << 1)  /* Reset registers */
-#define AC97_X_CR_LVBIE (1 << 2)  /* Last valid buffer interrupt enable */
-#define AC97_X_CR_FEIE  (1 << 3)  /* FIFO error interrupt enable */
-#define AC97_X_CR_IOCE  (1 << 4)  /* Interrupt on completion enable */
+#define AC97_X_CR_RPBM  NTH_BIT(0)  /* Run/pause bus master */
+#define AC97_X_CR_RR    NTH_BIT(1)  /* Reset registers */
+#define AC97_X_CR_LVBIE NTH_BIT(2)  /* Last valid buffer interrupt enable */
+#define AC97_X_CR_FEIE  NTH_BIT(3)  /* FIFO error interrupt enable */
+#define AC97_X_CR_IOCE  NTH_BIT(4)  /* Interrupt on completion enable */
 
 /* Status register flags */
-#define AC97_X_SR_DCH   (1 << 0)  /* DMA controller halted */
-#define AC97_X_SR_CELV  (1 << 1)  /* Current equals last valid */
-#define AC97_X_SR_LVBCI (1 << 2)  /* Last valid buffer completion interrupt */
-#define AC97_X_SR_BCIS  (1 << 3)  /* Buffer completion interrupt status */
-#define AC97_X_SR_FIFOE (1 << 3)  /* FIFO error */
+#define AC97_X_SR_DCH   NTH_BIT(0)  /* DMA controller halted */
+#define AC97_X_SR_CELV  NTH_BIT(1)  /* Current equals last valid */
+#define AC97_X_SR_LVBCI NTH_BIT(2)  /* Last valid buffer completion interrupt */
+#define AC97_X_SR_BCIS  NTH_BIT(3)  /* Buffer completion interrupt status */
+#define AC97_X_SR_FIFOE NTH_BIT(3)  /* FIFO error */
 
 /* Mixer IO port offsets */
 #define AC97_RESET          0x00
@@ -65,7 +64,7 @@
 #define AC97_PLAYBACK_SPEED 48000
 #define AC97_PLAYBACK_FORMAT SND_FORMAT_L16SLE
 
-/* An entry in a buffer dscriptor list */
+/* An entry in a buffer descriptor list */
 typedef struct {
 	uint32_t pointer;  /* Pointer to buffer */
 	uint32_t cl;       /* Control values and buffer length */

@@ -45,18 +45,18 @@ void dump_multiboot(struct multiboot *mboot_ptr) {
 	debug_print(INFO, "VBE se: 0x%x", mboot_ptr->vbe_interface_seg);
 	debug_print(INFO, "VBE of: 0x%x", mboot_ptr->vbe_interface_off);
 	debug_print(INFO, "VBE le: 0x%x", mboot_ptr->vbe_interface_len);
-	if (mboot_ptr->flags & (1 << 2)) {
+	if (mboot_ptr->flags & NTH_BIT(2)) {
 		debug_print(INFO, "Started with: %s", (char *)mboot_ptr->cmdline);
 	}
-	if (mboot_ptr->flags & (1 << 9)) {
+	if (mboot_ptr->flags & NTH_BIT(9)) {
 		debug_print(INFO, "Booted from: %s", (char *)mboot_ptr->boot_loader_name);
 	}
-	if (mboot_ptr->flags & (1 << 0)) {
+	if (mboot_ptr->flags & NTH_BIT(0)) {
 		debug_print(INFO, "%dkB lower memory", mboot_ptr->mem_lower);
 		int mem_mb = mboot_ptr->mem_upper / 1024;
 		debug_print(INFO, "%dkB higher memory (%dMB)", mboot_ptr->mem_upper, mem_mb);
 	}
-	if (mboot_ptr->flags & (1 << 3)) {
+	if (mboot_ptr->flags & NTH_BIT(3)) {
 		debug_print(INFO, "Found %d module(s).", mboot_ptr->mods_count);
 		if (mboot_ptr->mods_count > 0) {
 			uint32_t i;

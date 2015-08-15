@@ -15,6 +15,9 @@
 #include <process.h>
 #include <errno_defs.h>
 
+#define NTH_BIT(nth) (0x1 << nth)
+#define IS_BIT_SET(flag, nth) flag & NTH_BIT(nth)
+
 #define STR(x) #x
 #define STRSTR(x) STR(x)
 
@@ -24,8 +27,8 @@
 #define IRQ_OFF int_disable()
 #define IRQ_RES int_resume()
 #define IRQ_ON  int_enable()
-#define PAUSE   { asm volatile ("hlt"); }
-#define STOP while (1) { PAUSE; }
+#define KERNEL_PAUSE   { asm volatile ("hlt"); }
+#define KERNEL_FULL_STOP while (1) { KERNEL_PAUSE; }
 
 #define SYSCALL_VECTOR 0x7F
 #define SIGNAL_RETURN 0xFFFFDEAF

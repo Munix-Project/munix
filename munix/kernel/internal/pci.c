@@ -10,7 +10,6 @@
 #include <pci.h>
 #include <pci_list.h>
 
-
 void pci_write_field(uint32_t device, int field, int size, uint32_t value) {
 	outportl(PCI_ADDRESS_PORT, pci_get_addr(device, field));
 	outportl(PCI_VALUE_PORT, value);

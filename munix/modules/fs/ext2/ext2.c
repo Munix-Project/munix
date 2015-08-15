@@ -65,9 +65,9 @@ typedef struct {
 /*
  * These macros deal with the block group descriptor bitmap
  */
-#define BLOCKBIT(n)  (bg_buffer[((n) >> 3)] & (1 << (((n) % 8))))
+#define BLOCKBIT(n)  (bg_buffer[((n) >> 3)] & NTH_BIT((((n) % 8))))
 #define BLOCKBYTE(n) (bg_buffer[((n) >> 3)])
-#define SETBIT(n)    (1 << (((n) % 8)))
+#define SETBIT(n)    NTH_BIT((((n) % 8)))
 
 static uint32_t node_from_file(ext2_fs_t * this, ext2_inodetable_t *inode, ext2_dir_t *direntry,  fs_node_t *fnode);
 static uint32_t ext2_root(ext2_fs_t * this, ext2_inodetable_t *inode, fs_node_t *fnode);

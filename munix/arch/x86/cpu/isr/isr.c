@@ -86,7 +86,7 @@ void fault_handler(struct regs * r) {
 	} else {
 		debug_print(CRITICAL, "Unhandled exception: [%d] %s", r->int_no, exception_messages[r->int_no]);
 		HALT_AND_CATCH_FIRE("Process caused an unhandled exception", r);
-		STOP;
+		KERNEL_FULL_STOP;
 	}
 }
 
