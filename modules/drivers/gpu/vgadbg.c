@@ -5,10 +5,10 @@
  *      Author: miguel
  */
 
-#include <mod/ata/ata.h>
 #include <mod/module.h>
 #include <munix/system.h>
 #include <libc/printf.h>
+#include <mod/drivers/ata/ata.h>
 
 static unsigned short * textmemptr = (unsigned short *)0xB8000;
 static void placech(unsigned char c, int x, int y, int attr) {

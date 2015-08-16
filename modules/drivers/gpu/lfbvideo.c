@@ -20,10 +20,10 @@
 #include <libc/printf.h>
 #include <libc/tokenize.h>
 #include <libc/types.h>
-#include <mod/graphics/video.h>
 #include <mod/module.h>
 #include <mod/shell/terminal-font.h>
 #include <munix/system.h>
+#include <mod/drivers/gpu/video.h>
 
 #define PREFERRED_VY 4096
 #define PREFERRED_B 32

@@ -10,9 +10,9 @@
 #include <libc/printf.h>
 #include <mod/module.h>
 #include <mod/shell/shell.h>
-#include <mod/sound/snd.h>
 #include <munix/memory/mem.h>
 #include <munix/system.h>
+#include <mod/drivers/sound/snd.h>
 
 /* Utility macros */
 #define N_ELEMENTS(arr) (sizeof(arr) / sizeof((arr)[0]))

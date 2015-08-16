@@ -5,7 +5,7 @@
  *      Author: miguel
  */
 
-#include <mod/ps2/mouse.h>
+#include <mod/drivers/ps2/mouse.h>
 #include <debug/logging.h>
 #include <fs/pipe.h>
 #include <libc/args.h>

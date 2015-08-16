@@ -15,7 +15,7 @@
  * Provides raw block access to an (Parallel) ATA drive.
  */
 
-#include <mod/ata/ata.h>
+#include <mod/drivers/ata/ata.h>
 #include <debug/logging.h>
 #include <fs/fs.h>
 #include <libc/printf.h>

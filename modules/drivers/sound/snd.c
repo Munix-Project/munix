@@ -17,7 +17,7 @@
  * really support multiple devices despite the interface suggesting it might...
  */
 
-#include <mod/sound/snd.h>
+#include <mod/drivers/sound/snd.h>
 #include <munix/errno.h>
 #include <libc/list.h>
 #include <libc/ringbuffer.h>

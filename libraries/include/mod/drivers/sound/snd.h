@@ -11,7 +11,7 @@
 /* The format isn't really used for anything right now */
 #define SND_FORMAT_L16SLE 0  /* Linear 16-bit signed little endian */
 
-#include <mod/sound/sound.h>
+#include <mod/drivers/sound/sound.h>
 #include <debug/logging.h>
 #include <munix/system.h>
 
