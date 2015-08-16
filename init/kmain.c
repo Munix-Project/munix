@@ -39,15 +39,15 @@
  * WITH THE SOFTWARE.
  */
 
-#include <system.h>
-#include <boot.h>
-#include <ext2.h>
-#include <fs.h>
-#include <logging.h>
-#include <process.h>
-#include <shm.h>
-#include <args.h>
-#include <module.h>
+#include <mod/fs/ext2/ext2.h>
+#include <init/boot.h>
+#include <libc/args.h>
+#include <debug/logging.h>
+#include <fs/fs.h>
+#include <mod/module.h>
+#include <munix/memory/shm.h>
+#include <munix/system.h>
+#include <task/process.h>
 
 /* Initial esp value that is loaded right from the beginning and is used for memory */
 uintptr_t initial_esp = 0;

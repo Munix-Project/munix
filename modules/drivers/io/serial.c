@@ -5,13 +5,12 @@
  *      Author: miguel
  */
 
-
-#include <system.h>
-#include <fs.h>
-#include <pipe.h>
-#include <logging.h>
-#include <args.h>
-#include <module.h>
+#include <debug/logging.h>
+#include <fs/fs.h>
+#include <fs/pipe.h>
+#include <libc/args.h>
+#include <mod/module.h>
+#include <munix/system.h>
 
 #define SERIAL_PORT_A 0x3F8
 #define SERIAL_PORT_B 0x2F8

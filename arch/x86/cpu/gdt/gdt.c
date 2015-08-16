@@ -4,8 +4,8 @@
  *  Created on: Aug 13, 2015
  *      Author: miguel
  */
-#include <system.h>
-#include <tss.h>
+#include <munix/system.h>
+#include <task/tss.h>
 
 typedef struct {
 	/* Limits */

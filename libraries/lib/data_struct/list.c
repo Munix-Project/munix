@@ -5,9 +5,8 @@
  *      Author: miguel
  */
 
-#include "list.h"
-
-#include <system.h>
+#include <libc/list.h>
+#include <munix/system.h>
 
 void list_destroy(list_t * list) {
 	/* Free all of the contents of a list */

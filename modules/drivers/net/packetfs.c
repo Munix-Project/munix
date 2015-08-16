@@ -4,12 +4,12 @@
  *  Created on: Aug 13, 2015
  *      Author: miguel
  */
-#include <system.h>
-#include <fs.h>
-#include <pipe.h>
-#include <module.h>
-#include <logging.h>
-#include <ioctl.h>
+#include <debug/logging.h>
+#include <fs/fs.h>
+#include <fs/pipe.h>
+#include <mod/module.h>
+#include <munix/ioctl.h>
+#include <munix/system.h>
 
 #define MAX_PACKET_SIZE 1024
 

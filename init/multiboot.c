@@ -5,9 +5,9 @@
  *      Author: miguel
  */
 
-#include <system.h>
-#include <logging.h>
-#include <multiboot.h>
+#include <init/multiboot.h>
+#include <debug/logging.h>
+#include <munix/system.h>
 
 char * initrd_disk = NULL;
 struct multiboot * mboot_ptr = NULL;

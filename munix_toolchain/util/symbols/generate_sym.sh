@@ -6,7 +6,7 @@ cd ../../../
 TOOLCHAIN=munix_toolchain
 KERNELNAME=munix-kernel
 PYPATH=./$TOOLCHAIN/util/symbols/generate_symbols.py
-SYMBOLASM=./kernel/sys/sysmod/symbols.S
+SYMBOLASM=./kernel/symbols.S
 NM=i686-pc-toaru-nm
 
 # Now generate the symbols:

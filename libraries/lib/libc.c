@@ -5,9 +5,9 @@
  *      Author: miguel
  */
 
-#include <system.h>
-#include <limits.h>
-#include <libc.h>
+#include <libc/libc.h>
+#include <libc/limits.h>
+#include <munix/system.h>
 
 #define ALIGN (sizeof(size_t))
 #define ONES ((size_t)-1/UCHAR_MAX)

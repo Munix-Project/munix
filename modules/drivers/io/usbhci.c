@@ -5,11 +5,11 @@
  *      Author: miguel
  */
 
-#include <module.h>
-#include <pci.h>
-#include <printf.h>
-#include <logging.h>
-#include <mod/shell.h>
+#include <debug/logging.h>
+#include <drivers/pci/pci.h>
+#include <libc/printf.h>
+#include <mod/module.h>
+#include <mod/shell/shell.h>
 
 static uint32_t hub_device = 0;
 

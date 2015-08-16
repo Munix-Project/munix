@@ -5,10 +5,10 @@
  *      Author: miguel
  */
 
-#include <module.h>
-#include <printf.h>
-#include <pci.h>
-#include <mod/shell.h>
+#include <drivers/pci/pci.h>
+#include <libc/printf.h>
+#include <mod/module.h>
+#include <mod/shell/shell.h>
 
 struct hda_device {
 	uint32_t pci_device;

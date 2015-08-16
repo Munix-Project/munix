@@ -4,9 +4,9 @@
  *  Created on: Aug 13, 2015
  *      Author: miguel
  */
-#include <system.h>
-#include <logging.h>
-#include <tokenize.h>
+#include <libc/tokenize.h>
+#include <debug/logging.h>
+#include <munix/system.h>
 
 int tokenize(char * str, char * sep, char **buf) {
 	char * pch_i;

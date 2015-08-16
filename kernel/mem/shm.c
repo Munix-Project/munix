@@ -5,13 +5,13 @@
  *      Author: miguel
  */
 
-#include <system.h>
-#include <process.h>
-#include <logging.h>
-#include <shm.h>
-#include <mem.h>
-#include <tree.h>
-#include <list.h>
+#include <debug/logging.h>
+#include <libc/list.h>
+#include <libc/tree.h>
+#include <munix/memory/shm.h>
+#include <munix/memory/mem.h>
+#include <munix/system.h>
+#include <task/process.h>
 
 //static volatile uint8_t bsl; // big shm lock
 static spin_lock_t bsl; // big shm lock

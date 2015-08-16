@@ -17,14 +17,13 @@
  * really support multiple devices despite the interface suggesting it might...
  */
 
-#include <mod/snd.h>
-
-#include <errno_defs.h>
-#include <list.h>
-#include <mod/shell.h>
-#include <module.h>
-#include <ringbuffer.h>
-#include <system.h>
+#include <mod/sound/snd.h>
+#include <munix/errno.h>
+#include <libc/list.h>
+#include <libc/ringbuffer.h>
+#include <mod/module.h>
+#include <mod/shell/shell.h>
+#include <munix/system.h>
 
 /* Utility macros */
 #define N_ELEMENTS(arr) (sizeof(arr) / sizeof((arr)[0]))

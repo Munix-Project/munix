@@ -5,11 +5,11 @@
  *      Author: miguel
  */
 
-#include <system.h>
-#include <logging.h>
-#include <module.h>
-#include <fs.h>
-#include <printf.h>
+#include <debug/logging.h>
+#include <fs/fs.h>
+#include <libc/printf.h>
+#include <mod/module.h>
+#include <munix/system.h>
 
 static uint32_t read_initrd(fs_node_t *node, uint32_t offset, uint32_t size, uint8_t *buffer);
 static uint32_t write_initrd(fs_node_t *node, uint32_t offset, uint32_t size, uint8_t *buffer);

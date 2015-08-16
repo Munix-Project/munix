@@ -5,10 +5,10 @@
  *      Author: miguel
  */
 
-#include <system.h>
-#include <process.h>
-#include <va_list.h>
-#include <printf.h>
+#include <libc/printf.h>
+#include <libc/va_list.h>
+#include <munix/system.h>
+#include <task/process.h>
 
 static unsigned short * textmemptr = (unsigned short *)0xB8000;
 

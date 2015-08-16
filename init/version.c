@@ -5,7 +5,7 @@
  *      Author: miguel
  */
 
-#include <version.h>
+#include <init/version.h>
 
 char * __kernel_name = "minux";
 
@@ -23,7 +23,6 @@ int    __kernel_version_lower = 1;
 # define KERNEL_VERSION_SUFFIX "r"
 #endif
 char * __kernel_version_suffix   = KERNEL_VERSION_SUFFIX;
-
 
 char * __kernel_version_codename = "helios";
 

@@ -4,21 +4,20 @@
  *  Created on: Aug 13, 2015
  *      Author: miguel
  */
-#include <system.h>
-#include <fs.h>
-#include <printf.h>
-#include <logging.h>
-#include <process.h>
-#include <version.h>
-#include <termios.h>
-#include <tokenize.h>
-#include <hashmap.h>
-#include <pci.h>
-#include <pipe.h>
-#include <elf.h>
-#include <module.h>
-
-#include <mod/shell.h>
+#include <debug/logging.h>
+#include <drivers/pci/pci.h>
+#include <fs/fs.h>
+#include <fs/pipe.h>
+#include <init/version.h>
+#include <libc/hashmap.h>
+#include <libc/printf.h>
+#include <libc/tokenize.h>
+#include <mod/module.h>
+#include <mod/shell/shell.h>
+#include <mod/shell/termios.h>
+#include <munix/elf.h>
+#include <munix/system.h>
+#include <task/process.h>
 
 /*
  * This is basically the same as a userspace buffered/unbuffered

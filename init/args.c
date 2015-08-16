@@ -5,11 +5,11 @@
  *      Author: miguel
  */
 
-#include <system.h>
-#include <logging.h>
-#include <args.h>
-#include <hashmap.h>
-#include <tokenize.h>
+#include <libc/args.h>
+#include <debug/logging.h>
+#include <libc/hashmap.h>
+#include <libc/tokenize.h>
+#include <munix/system.h>
 
 char * cmdline = NULL;
 

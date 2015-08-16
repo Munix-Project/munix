@@ -5,14 +5,13 @@
  *      Author: miguel
  */
 
-#include <system.h>
-#include <logging.h>
-#include <fs.h>
-#include <version.h>
-#include <process.h>
-
-#include <module.h>
-#include <mod/tmpfs.h>
+#include <mod/fs/tmpfs.h>
+#include <debug/logging.h>
+#include <fs/fs.h>
+#include <init/version.h>
+#include <mod/module.h>
+#include <munix/system.h>
+#include <task/process.h>
 
 /* 1KB */
 #define BLOCKSIZE 1024

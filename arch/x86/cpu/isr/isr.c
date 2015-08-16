@@ -4,10 +4,10 @@
  *  Created on: Aug 13, 2015
  *      Author: miguel
  */
-#include <system.h>
-#include <module.h>
-#include <logging.h>
-#include <printf.h>
+#include <debug/logging.h>
+#include <libc/printf.h>
+#include <mod/module.h>
+#include <munix/system.h>
 
 /* The count is treated as is when setting up IDT gates. However there is an
  * additional ISR for the system call vector which is handled explicitly since

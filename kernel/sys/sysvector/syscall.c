@@ -5,16 +5,16 @@
  *      Author: miguel
  */
 
-#include <system.h>
-#include <process.h>
-#include <logging.h>
-#include <fs.h>
-#include <pipe.h>
-#include <version.h>
-#include <shm.h>
-#include <utsname.h>
-#include <printf.h>
-#include <syscall_nums.h>
+#include <debug/logging.h>
+#include <fs/fs.h>
+#include <fs/pipe.h>
+#include <libc/printf.h>
+#include <munix/memory/shm.h>
+#include <munix/syscall_nums.h>
+#include <munix/system.h>
+#include <munix/utsname.h>
+#include <task/process.h>
+#include <init/version.h>
 
 static char   hostname[256];
 static size_t hostname_len = 0;

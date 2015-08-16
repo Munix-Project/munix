@@ -5,13 +5,13 @@
  *      Author: miguel
  */
 
-#include <system.h>
-#include <fs.h>
-#include <printf.h>
-#include <list.h>
-#include <process.h>
-#include <logging.h>
-#include <hashmap.h>
+#include <debug/logging.h>
+#include <fs/fs.h>
+#include <libc/hashmap.h>
+#include <libc/list.h>
+#include <libc/printf.h>
+#include <munix/system.h>
+#include <task/process.h>
 
 #define MAX_SYMLINK_DEPTH 8
 #define MAX_SYMLINK_SIZE 4096

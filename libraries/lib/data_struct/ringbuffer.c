@@ -5,8 +5,8 @@
  *      Author: miguel
  */
 
-#include <system.h>
-#include <ringbuffer.h>
+#include <libc/ringbuffer.h>
+#include <munix/system.h>
 
 size_t ring_buffer_unread(ring_buffer_t * ring_buffer) {
 	if (ring_buffer->read_ptr == ring_buffer->write_ptr) {

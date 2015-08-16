@@ -5,13 +5,12 @@
  *      Author: miguel
  */
 
-#include <system.h>
-#include <logging.h>
-#include <fs.h>
-#include <pipe.h>
-#include <process.h>
-
-#include <module.h>
+#include <debug/logging.h>
+#include <fs/fs.h>
+#include <fs/pipe.h>
+#include <mod/module.h>
+#include <munix/system.h>
+#include <task/process.h>
 
 #define KEY_DEVICE  0x60
 #define KEY_PENDING 0x64

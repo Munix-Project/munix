@@ -5,15 +5,8 @@
  *      Author: miguel
  */
 
-
-#include "tree.h"
-
-#ifdef _KERNEL_
-#	include <system.h>
-#else
-#	include <stddef.h>
-#	include <stdlib.h>
-#endif
+#include <libc/tree.h>
+#include <munix/system.h>
 
 tree_t * tree_create(void) {
 	/* Create a new tree */

@@ -5,14 +5,14 @@
  *      Author: miguel
  */
 
-#include <logging.h>
-#include <mem.h>
-#include <module.h>
-#include <mod/shell.h>
-#include <mod/snd.h>
-#include <printf.h>
-#include <pci.h>
-#include <system.h>
+#include <debug/logging.h>
+#include <drivers/pci/pci.h>
+#include <libc/printf.h>
+#include <mod/module.h>
+#include <mod/shell/shell.h>
+#include <mod/sound/snd.h>
+#include <munix/memory/mem.h>
+#include <munix/system.h>
 
 /* Utility macros */
 #define N_ELEMENTS(arr) (sizeof(arr) / sizeof((arr)[0]))

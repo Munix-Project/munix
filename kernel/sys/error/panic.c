@@ -5,9 +5,9 @@
  *      Author: miguel
  */
 
-#include <system.h>
-#include <logging.h>
-#include <printf.h>
+#include <debug/logging.h>
+#include <libc/printf.h>
+#include <munix/system.h>
 
 void halt_and_catch_fire(char * error_message, const char * file, int line, struct regs * regs) {
 	IRQ_OFF;

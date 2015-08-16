@@ -5,11 +5,11 @@
  *      Author: miguel
  */
 
-#include <system.h>
-#include <fs.h>
-#include <printf.h>
-#include <pipe.h>
-#include <logging.h>
+#include <fs/pipe.h>
+#include <debug/logging.h>
+#include <fs/fs.h>
+#include <libc/printf.h>
+#include <munix/system.h>
 
 #define DEBUG_PIPES 0
 

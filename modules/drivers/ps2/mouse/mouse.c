@@ -5,12 +5,12 @@
  *      Author: miguel
  */
 
-#include <system.h>
-#include <logging.h>
-#include <pipe.h>
-#include <module.h>
-#include <mouse.h>
-#include <args.h>
+#include <mod/ps2/mouse.h>
+#include <debug/logging.h>
+#include <fs/pipe.h>
+#include <libc/args.h>
+#include <mod/module.h>
+#include <munix/system.h>
 
 static uint8_t mouse_cycle = 0;
 static int8_t  mouse_byte[4];

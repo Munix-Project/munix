@@ -5,7 +5,7 @@
  *      Author: miguel
  */
 
-#include "bitset.h"
+#include <libc/bitset.h>
 
 #define CEIL(NUMBER, BASE) \
 	(((NUMBER) + (BASE) - 1) & ~((BASE) - 1))

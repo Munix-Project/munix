@@ -22,11 +22,12 @@ init \
 kernel/debug \
 kernel/internal \
 kernel/mem \
+kernel \
 kernel/sys/error \
 kernel/sys/ring3 \
-kernel/sys/sysmod \
+kernel/sys \
 kernel/sys/sysvector \
-kernel/sys/thread \
+kernel/sys/task \
 libraries/lib/data_struct \
 libraries/lib \
 

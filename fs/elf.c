@@ -5,11 +5,11 @@
  *      Author: miguel
  */
 
-#include <system.h>
-#include <fs.h>
-#include <elf.h>
-#include <process.h>
-#include <logging.h>
+#include <munix/elf.h>
+#include <debug/logging.h>
+#include <fs/fs.h>
+#include <munix/system.h>
+#include <task/process.h>
 
 int exec_shebang(char * path, fs_node_t * file, int argc, char ** argv, char ** env);
 

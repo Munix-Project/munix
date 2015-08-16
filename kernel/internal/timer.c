@@ -5,9 +5,9 @@
  *      Author: miguel
  */
 
-#include <system.h>
-#include <logging.h>
-#include <process.h>
+#include <debug/logging.h>
+#include <munix/system.h>
+#include <task/process.h>
 
 #define PIT_A 0x40
 #define PIT_B 0x41

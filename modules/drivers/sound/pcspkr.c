@@ -5,9 +5,9 @@
  *      Author: miguel
  */
 
-#include <module.h>
-#include <printf.h>
-#include <mod/shell.h>
+#include <libc/printf.h>
+#include <mod/module.h>
+#include <mod/shell/shell.h>
 
 static void note(int length, int freq) {
 

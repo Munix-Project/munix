@@ -5,12 +5,12 @@
  *      Author: miguel
  */
 
-#include <system.h>
-#include <libc.h>
-#include <list.h>
-#include <logging.h>
-#include <va_list.h>
-#include <printf.h>
+#include <debug/logging.h>
+#include <libc/libc.h>
+#include <libc/list.h>
+#include <libc/printf.h>
+#include <libc/va_list.h>
+#include <munix/system.h>
 
 log_type_t debug_level = NOTICE;
 void * debug_file = NULL;

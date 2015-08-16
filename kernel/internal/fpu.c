@@ -5,8 +5,8 @@
  *      Author: miguel
  */
 
-#include <system.h>
-#include <logging.h>
+#include <debug/logging.h>
+#include <munix/system.h>
 
 process_t * fpu_thread = NULL;
 

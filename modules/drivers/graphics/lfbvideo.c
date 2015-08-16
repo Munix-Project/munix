@@ -12,18 +12,18 @@
  * Bochs VBE / QEMU vga=std Graphics Driver
  */
 
-#include <system.h>
-#include <fs.h>
-#include <printf.h>
-#include <types.h>
-#include <logging.h>
-#include <pci.h>
-#include <boot.h>
-#include <args.h>
-#include <tokenize.h>
-#include <module.h>
-#include <video.h>
-#include <mod/terminal-font.h>
+#include <debug/logging.h>
+#include <drivers/pci/pci.h>
+#include <fs/fs.h>
+#include <init/boot.h>
+#include <libc/args.h>
+#include <libc/printf.h>
+#include <libc/tokenize.h>
+#include <libc/types.h>
+#include <mod/graphics/video.h>
+#include <mod/module.h>
+#include <mod/shell/terminal-font.h>
+#include <munix/system.h>
 
 #define PREFERRED_VY 4096
 #define PREFERRED_B 32

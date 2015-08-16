@@ -4,9 +4,9 @@
  *  Created on: Aug 13, 2015
  *      Author: miguel
  */
-#include <system.h>
-#include <module.h>
-#include <printf.h>
+#include <libc/printf.h>
+#include <mod/module.h>
+#include <munix/system.h>
 
 /* Programmable interrupt controller */
 #define PIC1           0x20

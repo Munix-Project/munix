@@ -5,14 +5,14 @@
  *      Author: miguel
  */
 
-#include <system.h>
-#include <types.h>
-#include <fs.h>
-#include <ext2.h>
-#include <logging.h>
-#include <module.h>
-#include <args.h>
-#include <printf.h>
+#include <mod/fs/ext2/ext2.h>
+#include <debug/logging.h>
+#include <fs/fs.h>
+#include <libc/args.h>
+#include <libc/printf.h>
+#include <libc/types.h>
+#include <mod/module.h>
+#include <munix/system.h>
 
 #define EXT2_BGD_BLOCK 2
 

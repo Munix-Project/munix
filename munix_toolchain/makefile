@@ -10,14 +10,15 @@ RM := rm -rf
 -include sources.mk
 -include libraries/lib/data_struct/subdir.mk
 -include libraries/lib/subdir.mk
--include kernel/sys/thread/subdir.mk
+-include kernel/sys/task/subdir.mk
 -include kernel/sys/sysvector/subdir.mk
--include kernel/sys/sysmod/subdir.mk
 -include kernel/sys/ring3/subdir.mk
 -include kernel/sys/error/subdir.mk
+-include kernel/sys/subdir.mk
 -include kernel/mem/subdir.mk
 -include kernel/internal/subdir.mk
 -include kernel/debug/subdir.mk
+-include kernel/subdir.mk
 -include init/subdir.mk
 -include fs/subdir.mk
 -include arch/x86/cpu/isr/subdir.mk

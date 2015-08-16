@@ -5,13 +5,13 @@
  *      Author: miguel
  */
 
-#include <mem.h>
-#include <boot.h>
-#include <process.h>
-#include <logging.h>
-#include <signal.h>
-#include <hashmap.h>
-#include <module.h>
+#include <munix/memory/mem.h>
+#include <debug/logging.h>
+#include <init/boot.h>
+#include <libc/hashmap.h>
+#include <task/process.h>
+#include <task/signal.h>
+#include <mod/module.h>
 
 #define KERNEL_HEAP_INIT 0x00800000
 #define KERNEL_HEAP_END  0x20000000

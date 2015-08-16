@@ -5,15 +5,14 @@
  *      Author: miguel
  */
 
-#include <system.h>
-#include <fs.h>
-#include <pipe.h>
-#include <logging.h>
-#include <printf.h>
-
-#include <ioctl.h>
-#include <termios.h>
-#include <ringbuffer.h>
+#include <debug/logging.h>
+#include <fs/fs.h>
+#include <fs/pipe.h>
+#include <libc/printf.h>
+#include <libc/ringbuffer.h>
+#include <mod/shell/termios.h>
+#include <munix/ioctl.h>
+#include <munix/system.h>
 
 #define TTY_BUFFER_SIZE 512
 

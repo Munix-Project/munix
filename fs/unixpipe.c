@@ -5,14 +5,13 @@
  *      Author: miguel
  */
 
-#include <system.h>
-#include <fs.h>
-#include <pipe.h>
-#include <logging.h>
-#include <printf.h>
-
-#include <ioctl.h>
-#include <ringbuffer.h>
+#include <debug/logging.h>
+#include <fs/fs.h>
+#include <fs/pipe.h>
+#include <libc/printf.h>
+#include <libc/ringbuffer.h>
+#include <munix/ioctl.h>
+#include <munix/system.h>
 
 #define UNIX_PIPE_BUFFER 512
 

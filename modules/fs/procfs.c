@@ -5,13 +5,13 @@
  *      Author: miguel
  */
 
-#include <system.h>
-#include <logging.h>
-#include <fs.h>
-#include <version.h>
-#include <process.h>
-#include <printf.h>
-#include <module.h>
+#include <debug/logging.h>
+#include <fs/fs.h>
+#include <init/version.h>
+#include <libc/printf.h>
+#include <mod/module.h>
+#include <munix/system.h>
+#include <task/process.h>
 
 #define PROCFS_STANDARD_ENTRIES (sizeof(std_entries) / sizeof(struct procfs_entry))
 #define PROCFS_PROCDIR_ENTRIES  (sizeof(procdir_entries) / sizeof(struct procfs_entry))

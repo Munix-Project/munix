@@ -5,9 +5,9 @@
  *      Author: miguel
  */
 
-#include <module.h>
-#include <printf.h>
-#include <mod/shell.h>
+#include <libc/printf.h>
+#include <mod/module.h>
+#include <mod/shell/shell.h>
 
 DEFINE_SHELL_FUNCTION(crash, "Dereference NULL.") {
 	fprintf(tty, "*0x0 = %x\n", *((int *)0x00));
