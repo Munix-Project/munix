@@ -8,6 +8,18 @@ RM := rm -rf
 
 # All of the sources participating in the build are defined here
 -include sources.mk
+-include modules/sys/devices/subdir.mk
+-include modules/sys/subdir.mk
+-include modules/misc/subdir.mk
+-include modules/fs/ext2/subdir.mk
+-include modules/fs/subdir.mk
+-include modules/drivers/storage/subdir.mk
+-include modules/drivers/sound/subdir.mk
+-include modules/drivers/ps2/mouse/subdir.mk
+-include modules/drivers/ps2/keyboard/subdir.mk
+-include modules/drivers/net/subdir.mk
+-include modules/drivers/io/subdir.mk
+-include modules/drivers/graphics/subdir.mk
 -include libraries/lib/data_struct/subdir.mk
 -include libraries/lib/subdir.mk
 -include kernel/sys/thread/subdir.mk
@@ -39,36 +51,22 @@ endif
 # Add inputs and outputs from these tool invocations to the build variables 
 
 # All Target
-all: pre-build main-build
-
-# Main-build Target
-main-build: munix-kernel
+all: munix
 
 # Tool invocations
-munix-kernel: $(OBJS) $(USER_OBJS)
+munix: $(OBJS) $(USER_OBJS)
 	@echo 'Building target: $@'
 	@echo 'Invoking: Cross GCC Linker'
-	i686-pc-toaru-gcc -T "/home/miguel/git/munix/munix/kernel/link.ld" -nostdlib -lgcc -std=c99 -O2 -Wall -finline-functions -ffreestanding -Wall -Wextra -Wno-unused-function -Wno-unused-parameter -Wno-format -pedantic -fno-omit-frame-pointer -D_KERNEL_ -o "munix-kernel" $(OBJS) $(USER_OBJS) $(LIBS)
+	i686-elf-gcc -T "/home/miguel/git/munix/munix/kernel/link.ld" -nostdlib -o "munix" $(OBJS) $(USER_OBJS) $(LIBS)
 	@echo 'Finished building target: $@'
 	@echo ' '
-	$(MAKE) --no-print-directory post-build
 
 # Other Targets
 clean:
-	-$(RM) $(EXECUTABLES)$(OBJS)$(C_DEPS) munix-kernel
-	-@echo ' '
-
-pre-build:
-	-@echo 'Generating Assembly Symbols for kernel compilation . . .'
-	-"/home/miguel/git/munix/munix/munix_toolchain/util/symbols/generate_sym.sh"
-	-@echo ' '
-
-post-build:
-	-@echo 'Building Modules . . .'
-	-"/home/miguel/git/munix/munix/munix_toolchain/util/build_modules/build_modules.sh"
+	-$(RM) $(EXECUTABLES)$(OBJS)$(C_DEPS) munix
 	-@echo ' '
 
 .PHONY: all clean dependents
-.SECONDARY: main-build pre-build post-build
+.SECONDARY:
 
 -include ../makefile.targets

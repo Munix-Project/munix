@@ -99,5 +99,3 @@ static int zero_finalize(void) {
 }
 
 MODULE_DEF(zero, zero_initialize, zero_finalize);
-
-
