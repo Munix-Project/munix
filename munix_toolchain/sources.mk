@@ -21,7 +21,6 @@ fs \
 init \
 kernel/debug \
 kernel/internal \
-kernel \
 kernel/mem \
 kernel/sys/error \
 kernel/sys/ring3 \
