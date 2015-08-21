@@ -61,6 +61,7 @@ struct pack_header {
 };
 
 void move_stack_because_modules(struct multiboot *mboot){
+
 	if(IS_BIT_SET(mboot_ptr->flags,3)) {
 		mboot_mods_count = mboot_ptr->mods_count;
 
