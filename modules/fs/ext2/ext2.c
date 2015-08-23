@@ -1215,6 +1215,7 @@ static uint32_t write_ext2(fs_node_t *node, uint32_t offset, uint32_t size, uint
 
 	uint32_t rv = write_inode_buffer(this, inode, node->inode, offset, size, buffer);
 	free(inode);
+	ext2_sync(this);
 	return rv;
 }
 
