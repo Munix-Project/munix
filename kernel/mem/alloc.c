@@ -1,14 +1,4 @@
 /*
- * alloc.c
- *
- *  Created on: Aug 13, 2015
- *      Author: miguel
- */
-
-/* ORIGINAL HEADER FROM KEVIN LANGE: */
-
-/* vim: tabstop=4 shiftwidth=4 noexpandtab
- *
  * Kevin Lange's Slab Allocator
  *
  * Implemented for CS241, Fall 2010, machine problem 7

@@ -1,9 +1,10 @@
 /*
- * module.c
+ * This file is part of ToaruOS and is released under the terms
+ * of the NCSA / University of Illinois License - see LICENSE.md
+ * Copyright (C) 2015 Dale Weiler
  *
- *  Created on: Aug 13, 2015
- *      Author: miguel
  */
+
 #include <debug/logging.h>
 #include <fs/fs.h>
 #include <libc/hashmap.h>

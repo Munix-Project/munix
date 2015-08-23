@@ -1,8 +1,8 @@
 /*
- * ipv4.h
+ * This file is part of ToaruOS and is released under the terms
+ * of the NCSA / University of Illinois License - see LICENSE.md
+ * Copyright (C) 2015 Dale Weiler
  *
- *  Created on: Aug 16, 2015
- *      Author: miguel
  */
 
 #ifndef LIBRARIES_INCLUDE_NET_IPV4_H_
