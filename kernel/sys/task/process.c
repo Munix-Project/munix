@@ -736,7 +736,8 @@ int waitpid(int pid, int * status, int options) {
 		proc = process_from_pid(proc->group);
 	}
 
-	debug_print(INFO, "waitpid(%s%d, ..., %d) (from pid=%d.%d)", (pid >= 0) ? "" : "-", (pid >= 0) ? pid : -pid, options, current_process->id, current_process->group);
+	/* Commenting this debug print for now because it bombs the output console while waiting (in a non-blocking manner) for a pid */
+	/*debug_print(INFO, "waitpid(%s%d, ..., %d) (from pid=%d.%d)", (pid >= 0) ? "" : "-", (pid >= 0) ? pid : -pid, options, current_process->id, current_process->group); */
 
 	do {
 		process_t * candidate = NULL;
