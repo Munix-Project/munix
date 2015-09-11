@@ -48,7 +48,7 @@ main-build: munix-kernel
 munix-kernel: $(OBJS) $(USER_OBJS)
 	@echo 'Building target: $@'
 	@echo 'Invoking: Cross GCC Linker'
-	i686-pc-toaru-gcc -T "/home/miguel/git/munix/init/link.ld" -nostdlib -lgcc -std=c99 -O2 -Wall -finline-functions -ffreestanding -Wall -Wextra -Wno-unused-function -Wno-unused-parameter -Wno-format -pedantic -fno-omit-frame-pointer -D_KERNEL_ -o "munix-kernel" $(OBJS) $(USER_OBJS) $(LIBS)
+	i686-munix-gcc -T "/home/miguel/git/munix/init/link.ld" -nostdlib -lgcc -std=c99 -O2 -Wall -finline-functions -ffreestanding -Wall -Wextra -Wno-unused-function -Wno-unused-parameter -Wno-format -pedantic -fno-omit-frame-pointer -D_KERNEL_ -o "munix-kernel" $(OBJS) $(USER_OBJS) $(LIBS)
 	@echo 'Finished building target: $@'
 	@echo ' '
 	$(MAKE) --no-print-directory post-build
