@@ -25,16 +25,17 @@
 #define PREFERRED_VY 4096
 
 uint8_t is_mounted = 0;
+uint8_t is_init = 0;
 
 /* Generic (pre-set, 32-bit, linear frame buffer) */
-static void graphics_install_preset(uint16_t, uint16_t);
+static int graphics_install_preset(uint16_t, uint16_t);
 
 static uint16_t lfb_resolution_x = 0;
 static uint16_t lfb_resolution_y = 0;
 static uint16_t lfb_resolution_b = 0;
 
 /* BOCHS / QEMU VBE Driver */
-static void graphics_install_bochs(uint16_t, uint16_t);
+static int graphics_install_bochs(uint8_t, uint16_t, uint16_t);
 static void bochs_set_y_offset(uint16_t y);
 static uint16_t bochs_current_scroll(void);
 
@@ -44,6 +45,16 @@ static uint16_t bochs_current_scroll(void);
  * #define.
  */
 static uint8_t * lfb_vid_memory = (uint8_t *)0xE0000000;
+
+void enable_gfx() {
+	outports(0x1CE, 0x04);
+	outports(0x1CF, 0x41);
+}
+
+void disable_gfx() {
+	outports(0x1CE, 0x04);
+	outports(0x1CF, 0x00);
+}
 
 static int ioctl_vid(fs_node_t * node, int request, void * argp) {
 	/* TODO: Make this actually support multiple video devices */
@@ -67,11 +78,12 @@ static int ioctl_vid(fs_node_t * node, int request, void * argp) {
 			return 0;
 		case IO_VID_RST:
 			validate(argp);
-			graphics_install_bochs(PREFERRED_WIDTH, PREFERRED_HEIGHT);
+			enable_gfx();
 			return 0;
 		case IO_VID_STP:
 			validate(argp);
 			/* TODO */
+			//disable_gfx();
 			return 0;
 	}
 	return -1;
@@ -162,7 +174,7 @@ static void lfb_video_panic(char ** msgs) {
 static fs_node_t * lfb_video_device_create(void /* TODO */) {
 	fs_node_t * fnode = malloc(sizeof(fs_node_t));
 	memset(fnode, 0x00, sizeof(fs_node_t));
-	sprintf(fnode->name, "fb0"); /* TODO */
+	sprintf(fnode->name, "fb0");
 	fnode->length  = lfb_resolution_x * lfb_resolution_y * (lfb_resolution_b / 8);
 	fnode->flags   = FS_BLOCKDEVICE;
 	fnode->ioctl   = ioctl_vid;
@@ -204,22 +216,25 @@ static void bochs_scan_pci(uint32_t device, uint16_t v, uint16_t d, void * extra
 	}
 }
 
-static void graphics_install_bochs(uint16_t resolution_x, uint16_t resolution_y) {
+static int graphics_install_bochs(uint8_t enablegfx, uint16_t resolution_x, uint16_t resolution_y) {
+	/* Already initialized, don't try to do it again... */
+	if(is_init) return -1;
+	is_init = 1;
+
 	debug_print(NOTICE, "Setting up BOCHS/QEMU graphics controller...");
 
 	outports(0x1CE, 0x00);
 	uint16_t i = inports(0x1CF);
 	if (i < 0xB0C0 || i > 0xB0C6)
-		return;
+		return -1;
 	outports(0x1CF, 0xB0C4);
 	i = inports(0x1CF);
 	/* Disable VBE */
-	outports(0x1CE, 0x04);
-	outports(0x1CF, 0x00);
-	/* Set X resolution to 1024 */
+	disable_gfx();
+	/* Set X resolution to 800 */
 	outports(0x1CE, 0x01);
 	outports(0x1CF, resolution_x);
-	/* Set Y resolution to 768 */
+	/* Set Y resolution to 600 */
 	outports(0x1CE, 0x02);
 	outports(0x1CF, resolution_y);
 	/* Set bpp to 32 */
@@ -229,17 +244,16 @@ static void graphics_install_bochs(uint16_t resolution_x, uint16_t resolution_y)
 	outports(0x1CE, 0x07);
 	outports(0x1CF, PREFERRED_VY);
 	/* Re-enable VBE */
-	outports(0x1CE, 0x04);
-	outports(0x1CF, 0x41);
+	if(enablegfx)
+		enable_gfx();
 
 	pci_scan(bochs_scan_pci, -1, &lfb_vid_memory);
 
 	if (lfb_vid_memory) {
 		/* Enable the higher memory */
 		uintptr_t fb_offset = (uintptr_t)lfb_vid_memory;
-		for (uintptr_t i = fb_offset; i <= fb_offset + 0xFF0000; i += 0x1000) {
+		for (uintptr_t i = fb_offset; i <= fb_offset + 0xFF0000; i += 0x1000)
 			dma_frame(get_page(i, 1, kernel_directory), 0, 1, i);
-		}
 
 		goto mem_found;
 	} else {
@@ -263,20 +277,28 @@ static void graphics_install_bochs(uint16_t resolution_x, uint16_t resolution_y)
 			}
 		}
 	}
+	return -1;
 
 mem_found:
+	debug_print(NOTICE, "Video: Memory found! (0x%x)", lfb_vid_memory);
 	if (lfb_vid_memory + 4 * resolution_x * resolution_y > lfb_vid_memory + 0xFF0000) {
 		for (uintptr_t i = (uintptr_t)lfb_vid_memory + 0xFF1000; i <= (uintptr_t)lfb_vid_memory + 4 * resolution_x * resolution_y; i += 0x1000) {
 			debug_print(WARNING, "Also mapping 0x%x", i);
 			dma_frame(get_page(i, 1, kernel_directory), 0, 1, i);
 		}
 	}
+
 	finalize_graphics(resolution_x, resolution_y, PREFERRED_B);
+	return 0;
 }
 
 /* }}} end bochs support */
 
-static void graphics_install_preset(uint16_t w, uint16_t h) {
+static int graphics_install_preset(uint16_t w, uint16_t h) {
+	/* Already initialized, don't try to do it again... */
+	if(is_init) return -1;
+	is_init = 1;
+
 	debug_print(NOTICE, "Graphics were pre-configured (thanks, bootloader!), locating video memory...");
 	uint16_t b = 32; /* If you are 24 bit, go away, we really do not support you. */
 
@@ -332,6 +354,7 @@ mem_found:
 			((uint32_t *)lfb_vid_memory)[x + y * w] = 0xFF000000 | (f * 0x10000) | (f * 0x100) | f;
 		}
 	}
+	return 0;
 }
 
 static int init(void) {
@@ -357,7 +380,7 @@ static int init(void) {
 
 		if (!strcmp(argv[0], "qemu")) {
 			/* Bochs / Qemu Video Device */
-			graphics_install_bochs(x,y);
+			graphics_install_bochs(1, x,y);
 		} else if (!strcmp(argv[0],"preset")) {
 			graphics_install_preset(x,y);
 		} else {
@@ -366,9 +389,9 @@ static int init(void) {
 
 		free(arg);
 	} else {
-		/* Simply mount fb0 so we can control it through ioctl on the OS */
-		debug_print(NOTICE, "Video mode was NOT requested. We're mounting the device anyway so the OS can use it and initialize it.");
-		finalize_graphics(PREFERRED_WIDTH, PREFERRED_HEIGHT, PREFERRED_B);
+		/* Simply allocate the memory and mount the device for the video, but don't enable the graphics */
+		debug_print(NOTICE, "Video mode was NOT requested. We're mounting the device anyway so the OS can use it, initialize and enable it.");
+		graphics_install_bochs(0, PREFERRED_WIDTH, PREFERRED_HEIGHT);
 	}
 
 	return 0;
