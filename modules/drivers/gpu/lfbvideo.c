@@ -19,8 +19,13 @@
 #include <munix/system.h>
 #include <mod/drivers/gpu/video.h>
 
-#define PREFERRED_VY 4096
+#define PREFERRED_WIDTH 800
+#define PREFERRED_HEIGHT 600
 #define PREFERRED_B 32
+#define PREFERRED_VY 4096
+
+uint8_t is_mounted = 0;
+
 /* Generic (pre-set, 32-bit, linear frame buffer) */
 static void graphics_install_preset(uint16_t, uint16_t);
 
@@ -60,9 +65,16 @@ static int ioctl_vid(fs_node_t * node, int request, void * argp) {
 			validate(argp);
 			*((uintptr_t *)argp) = (uintptr_t)lfb_vid_memory;
 			return 0;
-		default:
-			return -1; /* TODO EINV... something or other */
+		case IO_VID_RST:
+			validate(argp);
+			graphics_install_bochs(PREFERRED_WIDTH, PREFERRED_HEIGHT);
+			return 0;
+		case IO_VID_STP:
+			validate(argp);
+			/* TODO */
+			return 0;
 	}
+	return -1;
 }
 
 static int vignette_at(int x, int y) {
@@ -158,12 +170,16 @@ static fs_node_t * lfb_video_device_create(void /* TODO */) {
 }
 
 static void finalize_graphics(uint16_t x, uint16_t y, uint16_t b) {
+	/* already mounted it, don't create a new device unnecessarily */
+	if(is_mounted) return;
+
 	lfb_resolution_x = x;
 	lfb_resolution_y = y;
 	lfb_resolution_b = b;
 	fs_node_t * fb_device = lfb_video_device_create();
 	vfs_mount("/dev/fb0", fb_device);
 	debug_video_crash = lfb_video_panic;
+	is_mounted = 1;
 }
 
 /* Bochs support {{{ */
@@ -183,9 +199,8 @@ static void bochs_scan_pci(uint32_t device, uint16_t v, uint16_t d, void * extra
 	if ((v == 0x1234 && d == 0x1111) ||
 	    (v == 0x80EE && d == 0xBEEF)) {
 		uintptr_t t = pci_read_field(device, PCI_BAR0, 4);
-		if (t > 0) {
+		if (t > 0)
 			*((uint8_t **)extra) = (uint8_t *)(t & 0xFFFFFFF0);
-		}
 	}
 }
 
@@ -194,9 +209,8 @@ static void graphics_install_bochs(uint16_t resolution_x, uint16_t resolution_y)
 
 	outports(0x1CE, 0x00);
 	uint16_t i = inports(0x1CF);
-	if (i < 0xB0C0 || i > 0xB0C6) {
+	if (i < 0xB0C0 || i > 0xB0C6)
 		return;
-	}
 	outports(0x1CF, 0xB0C4);
 	i = inports(0x1CF);
 	/* Disable VBE */
@@ -321,10 +335,8 @@ mem_found:
 }
 
 static int init(void) {
-
-	if (mboot_ptr->vbe_mode_info) {
+	if (mboot_ptr->vbe_mode_info)
 		lfb_vid_memory = (uint8_t *)((vbe_info_t *)(mboot_ptr->vbe_mode_info))->physbase;
-	}
 
 	char * c;
 	if ((c = args_value("vid"))) {
@@ -336,8 +348,8 @@ static int init(void) {
 
 		uint16_t x, y;
 		if (argc < 3) {
-			x = 1024;
-			y = 768;
+			x = PREFERRED_WIDTH;
+			y = PREFERRED_HEIGHT;
 		} else {
 			x = atoi(argv[1]);
 			y = atoi(argv[2]);
@@ -353,6 +365,10 @@ static int init(void) {
 		}
 
 		free(arg);
+	} else {
+		/* Simply mount fb0 so we can control it through ioctl on the OS */
+		debug_print(NOTICE, "Video mode was NOT requested. We're mounting the device anyway so the OS can use it and initialize it.");
+		finalize_graphics(PREFERRED_WIDTH, PREFERRED_HEIGHT, PREFERRED_B);
 	}
 
 	return 0;
@@ -363,6 +379,3 @@ static int fini(void) {
 }
 
 MODULE_DEF(lfbvideo, init, fini);
-
-
-

@@ -12,5 +12,7 @@
 #define IO_VID_HEIGHT 0x5002
 #define IO_VID_DEPTH  0x5003
 #define IO_VID_ADDR   0x5004
+#define IO_VID_RST	  0x5005 /* Reset video */
+#define IO_VID_STP	  0x5006 /* Video Stop */
 
 #endif /* KERNEL_INCLUDE_VIDEO_H_ */

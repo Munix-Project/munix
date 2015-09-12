@@ -8,7 +8,7 @@ MODULES_OBJ_ = $(notdir ${MODULES_SRC:.c=.ko})
 MODULES_OBJ = ${MODULES_OUT_PATH}/$(subst ${SPACE}, ${MODULES_OUT_PATH}/,${MODULES_OBJ_})
 MODULES_LIB_PATH = libraries/include
 
-CC=i686-pc-toaru-gcc
+CC=i686-munix-gcc
 
 CFLAGS  = -O2 -std=c99
 CFLAGS += -finline-functions -ffreestanding
