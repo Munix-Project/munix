@@ -49,6 +49,10 @@ typedef struct {
 } Point;
 
 typedef struct {
+	int32_t X, Y, Z;
+} Point3;
+
+typedef struct {
 	uint32_t X, Y;
 } UPoint;
 
