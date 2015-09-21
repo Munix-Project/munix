@@ -84,14 +84,11 @@ void init_fpu(void) {
 void invalid_op(struct regs * r) {
 	/* First, turn the FPU on */
 	enable_fpu();
-	if (fpu_thread == current_process) {
-		/* If this is the tread that last used the FPU, do nothing */
+	if (fpu_thread == current_process) /* If this is the tread that last used the FPU, do nothing */
 		return;
-	}
-	if (fpu_thread) {
-		/* If there is a thread that was using the FPU, save its state */
+	if (fpu_thread) /* If there is a thread that was using the FPU, save its state */
 		save_fpu(fpu_thread);
-	}
+
 	fpu_thread = (process_t *)current_process;
 	if (!fpu_thread->thread.fpu_enabled) {
 		/*
@@ -116,5 +113,3 @@ void fpu_install(void) {
 	isr_install_handler(ISR_INVOPCODE, &invalid_op);
 	isr_install_handler(ISR_DEVICEUN, &invalid_op);
 }
-
-

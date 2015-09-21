@@ -7052,5 +7052,4 @@ const char *	PciDevSelFlags [] =
 // Use this value for loop control during searching:
 #define	PCI_DEVSELFLAGS_LEN	(sizeof(PciDevSelFlags)/sizeof(char *))
 
-
 #endif /* KERNEL_INCLUDE_PCI_LIST_H_ */

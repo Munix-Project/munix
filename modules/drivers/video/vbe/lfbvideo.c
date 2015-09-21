@@ -17,7 +17,7 @@
 #include <mod/module.h>
 #include <mod/shell/terminal-font.h>
 #include <munix/system.h>
-#include <mod/drivers/gpu/video.h>
+#include "../../../../libraries/include/mod/drivers/video/video.h"
 
 #define PREFERRED_WIDTH 	1280
 #define PREFERRED_HEIGHT 	768

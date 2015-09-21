@@ -27,21 +27,17 @@ static inline void arch_atomic_dec(volatile int * x) {
 }
 
 void spin_wait(volatile int * addr, volatile int * waiters) {
-	if (waiters) {
+	if (waiters)
 		arch_atomic_inc(waiters);
-	}
-	while (*addr) {
+	while (*addr)
 		switch_task(1);
-	}
-	if (waiters) {
+	if (waiters)
 		arch_atomic_dec(waiters);
-	}
 }
 
 void spin_lock(spin_lock_t lock) {
-	while (arch_atomic_swap(lock, 1)) {
+	while (arch_atomic_swap(lock, 1))
 		spin_wait(lock, lock+1);
-	}
 }
 
 void spin_init(spin_lock_t lock) {
@@ -52,9 +48,8 @@ void spin_init(spin_lock_t lock) {
 void spin_unlock(spin_lock_t lock) {
 	if (lock[0]) {
 		arch_atomic_store(lock, 0);
-		if (lock[1]){
+		if (lock[1])
 			switch_task(1);
-		}
 	}
 }
 

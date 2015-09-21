@@ -7,9 +7,7 @@
 #include <init/version.h>
 
 char * __kernel_name = "minux";
-
 char * __kernel_version_format = "%d.%d.%d-%s";
-
 int    __kernel_version_major = 0;
 int    __kernel_version_minor = 11;
 int    __kernel_version_lower = 1;
@@ -22,11 +20,8 @@ int    __kernel_version_lower = 1;
 # define KERNEL_VERSION_SUFFIX "r"
 #endif
 char * __kernel_version_suffix   = KERNEL_VERSION_SUFFIX;
-
 char * __kernel_version_codename = "helios";
-
 char * __kernel_arch = "i686";
-
 char * __kernel_build_date = __DATE__;
 char * __kernel_build_time = __TIME__;
 

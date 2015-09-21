@@ -19,8 +19,7 @@
 #define from_bcd(val)  ((val / 16) * 10 + (val & 0xf))
 
 void cmos_dump(uint16_t * values) {
-	uint16_t index;
-	for (index = 0; index < 128; ++index) {
+	for (uint16_t index = 0; index < 128; ++index) {
 		outportb(0x70, index);
 		values[index] = inportb(0x71);
 	}
@@ -100,9 +99,8 @@ uint32_t secs_of_month(int months, int year) {
 			days += 31;
 		case 2:
 			days += 28;
-			if ((year % 4 == 0) && ((year % 100 != 0) || (year % 400 == 0))) {
+			if ((year % 4 == 0) && ((year % 100 != 0) || (year % 400 == 0)))
 				days++;
-			}
 		case 1:
 			days += 31;
 		default:
@@ -139,5 +137,3 @@ uint32_t now(void) {
 	gettimeofday(&t, NULL);
 	return t.tv_sec;
 }
-
-

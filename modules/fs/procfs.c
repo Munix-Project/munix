@@ -43,10 +43,8 @@ static uint32_t proc_cmdline_func(fs_node_t *node, uint32_t offset, uint32_t siz
 	char buf[1024];
 	process_t * proc = process_from_pid(node->inode);
 
-	if (!proc) {
-		/* wat */
+	if (!proc)
 		return 0;
-	}
 
 	if (!proc->cmdline) {
 		sprintf(buf, "%s", proc->name);
@@ -58,8 +56,6 @@ static uint32_t proc_cmdline_func(fs_node_t *node, uint32_t offset, uint32_t siz
 		memcpy(buffer, buf, size);
 		return size;
 	}
-
-
 	buf[0] = '\0';
 
 	char *  _buf = buf;
@@ -87,10 +83,8 @@ static uint32_t proc_status_func(fs_node_t *node, uint32_t offset, uint32_t size
 	process_t * proc = process_from_pid(node->inode);
 	process_t * parent = process_get_parent(proc);
 
-	if (!proc) {
-		/* wat */
+	if (!proc)
 		return 0;
-	}
 
 	char state = process_is_ready(proc) ? 'R' : 'S';
 	char * name = proc->name + strlen(proc->name) - 1;
@@ -394,5 +388,3 @@ int procfs_finalize(void) {
 }
 
 MODULE_DEF(procfs, procfs_initialize, procfs_finalize);
-
-

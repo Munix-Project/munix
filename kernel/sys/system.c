@@ -19,9 +19,8 @@ char * boot_arg_extra = NULL;
  */
 unsigned short * memsetw(unsigned short * dest, unsigned short val, int count) {
 	int i = 0;
-	for ( ; i < count; ++i ) {
+	for ( ; i < count; ++i )
 		dest[i] = val;
-	}
 	return dest;
 }
 
@@ -32,7 +31,6 @@ uint32_t __attribute__ ((pure)) krand(void) {
 	static uint32_t w = 88675123;
 
 	uint32_t t;
-
 	t = x ^ (x << 11);
 	x = y; y = z; z = w;
 	return w = w ^ (w >> 19) ^ t ^ (t >> 8);

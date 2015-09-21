@@ -176,9 +176,8 @@ exec_def_t fmts[] = {
 };
 
 static int matches(unsigned char * a, unsigned char * b, unsigned int len) {
-	for (unsigned int i = 0; i < len; ++i) {
+	for (unsigned int i = 0; i < len; ++i)
 		if (a[i] != b[i]) return 0;
-	}
 	return 1;
 }
 
@@ -259,9 +258,8 @@ int exec_shebang(char * path, fs_node_t * file, int argc, char ** argv, char ** 
 	args[3] = NULL;
 
 	int j = arg ? 3 : 2;
-	for (int i = 1; i < argc; ++i, ++j) {
+	for (int i = 1; i < argc; ++i, ++j)
 		args[j] = argv[i];
-	}
 	args[j] = NULL;
 
 	return exec(cmd, nargc, args, env);
@@ -283,6 +281,3 @@ int system(char * path, int argc, char ** argv) {
 	kexit(-1);
 	return -1;
 }
-
-
-

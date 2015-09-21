@@ -72,9 +72,8 @@ void debug_print_process_tree_node(tree_node_t * node, size_t height) {
 	memset(tmp, 0, 512);
 	char * c = tmp;
 	/* Indent output */
-	for (uint32_t i = 0; i < height; ++i) {
+	for (uint32_t i = 0; i < height; ++i)
 		c += sprintf(c, "  ");
-	}
 	/* Get the current process */
 	process_t * proc = (process_t *)node->value;
 	/* Print the process name */
@@ -83,9 +82,8 @@ void debug_print_process_tree_node(tree_node_t * node, size_t height) {
 		/* And, if it has one, its description */
 		c += sprintf(c, " %s", proc->description);
 	}
-	if (proc->finished) {
+	if (proc->finished)
 		c += sprintf(c, " [zombie]");
-	}
 	/* Linefeed */
 	debug_print(NOTICE, "%s", tmp);
 	free(tmp);
@@ -109,9 +107,8 @@ void debug_print_process_tree(void) {
  * @return A pointer to the next process in the queue.
  */
 process_t * next_ready_process(void) {
-	if (!process_available()) {
+	if (!process_available())
 		return kernel_idle_task;
-	}
 	node_t * np = list_dequeue(process_queue);
 	assert(np && "Ready queue is empty.");
 	process_t * next = np->value;
@@ -149,14 +146,13 @@ void make_process_ready(process_t * proc) {
 	spin_unlock(process_queue_lock);
 }
 
-
-extern void tree_remove_reparent_root(tree_t * tree, tree_node_t * node);
-
 /*
  * Delete a process from the process tree
  *
  * @param proc Process to find and remove.
  */
+extern void tree_remove_reparent_root(tree_t * tree, tree_node_t * node);
+
 void delete_process(process_t * proc) {
 	tree_node_t * entry = proc->tree_entry;
 
@@ -166,10 +162,8 @@ void delete_process(process_t * proc) {
 	/* We can not remove the root, which is an error anyway */
 	assert((entry != process_tree->root) && "Attempted to kill init.");
 
-	if (process_tree->root == entry) {
-		/* We are init, don't even bother. */
-		return;
-	}
+	if (process_tree->root == entry)
+		return; /* We are init, don't even bother. */
 
 	/* Remove the entry. */
 	spin_lock(tree_lock);
@@ -447,9 +441,8 @@ process_t * process_from_pid(pid_t pid) {
 	spin_lock(tree_lock);
 	tree_node_t * entry = tree_find(process_tree,&pid,process_compare);
 	spin_unlock(tree_lock);
-	if (entry) {
+	if (entry)
 		return (process_t *)entry->value;
-	}
 	return NULL;
 }
 
@@ -458,10 +451,8 @@ process_t * process_get_parent(process_t * process) {
 	spin_lock(tree_lock);
 
 	tree_node_t * entry = process->tree_entry;
-
-	if (entry->parent) {
+	if (entry->parent)
 		result = entry->parent->value;
-	}
 
 	spin_unlock(tree_lock);
 	return result;
@@ -498,7 +489,7 @@ process_t * process_wait(process_t * process, pid_t pid, int * status, int optio
  * @return Don't know yet, but I think it should return something.
  */
 int process_wake(process_t * process, process_t * caller) {
-
+	/* TODO? */
 	return 0;
 }
 
@@ -511,7 +502,6 @@ int process_wake(process_t * process, process_t * caller) {
 void set_process_environment(process_t * proc, page_directory_t * directory) {
 	assert(proc);
 	assert(directory);
-
 	proc->thread.page_directory = directory;
 }
 
@@ -560,9 +550,8 @@ uint32_t process_append_fd(process_t * proc, fs_node_t * node) {
  * @return The destination file descriptor, -1 on failure
  */
 uint32_t process_move_fd(process_t * proc, int src, int dest) {
-	if ((size_t)src > proc->fds->length || (size_t)dest > proc->fds->length) {
+	if ((size_t)src > proc->fds->length || (size_t)dest > proc->fds->length)
 		return -1;
-	}
 	if (proc->fds->entries[dest] != proc->fds->entries[src]) {
 		close_fs(proc->fds->entries[dest]);
 		proc->fds->entries[dest] = proc->fds->entries[src];
@@ -620,7 +609,6 @@ int process_is_ready(process_t * proc) {
 	return (proc->sched_node.owner != NULL);
 }
 
-
 void wakeup_sleepers(unsigned long seconds, unsigned long subseconds) {
 	IRQ_OFF;
 	spin_lock(sleep_lock);
@@ -630,16 +618,14 @@ void wakeup_sleepers(unsigned long seconds, unsigned long subseconds) {
 			process_t * process = proc->process;
 			process->sleep_node.owner = NULL;
 			process->timed_sleep_node = NULL;
-			if (!process_is_ready(process)) {
+			if (!process_is_ready(process))
 				make_process_ready(process);
-			}
 			free(proc);
 			free(list_dequeue(sleep_queue));
-			if (sleep_queue->length) {
+			if (sleep_queue->length)
 				proc = ((sleeper_t *)sleep_queue->head->value);
-			} else {
+			else
 				break;
-			}
 		}
 	}
 	spin_unlock(sleep_lock);
@@ -647,10 +633,9 @@ void wakeup_sleepers(unsigned long seconds, unsigned long subseconds) {
 }
 
 void sleep_until(process_t * process, unsigned long seconds, unsigned long subseconds) {
-	if (current_process->sleep_node.owner) {
-		/* Can't sleep, sleeping already */
-		return;
-	}
+	if (current_process->sleep_node.owner)
+		return; /* Can't sleep, sleeping already */
+
 	process->sleep_node.owner = sleep_queue;
 
 	IRQ_OFF;
@@ -658,9 +643,8 @@ void sleep_until(process_t * process, unsigned long seconds, unsigned long subse
 	node_t * before = NULL;
 	foreach(node, sleep_queue) {
 		sleeper_t * candidate = ((sleeper_t *)node->value);
-		if (candidate->end_tick > seconds || (candidate->end_tick == seconds && candidate->end_subtick > subseconds)) {
+		if (candidate->end_tick > seconds || (candidate->end_tick == seconds && candidate->end_subtick > subseconds))
 			break;
-		}
 		before = node;
 	}
 	sleeper_t * proc = malloc(sizeof(sleeper_t));
@@ -685,9 +669,8 @@ void cleanup_process(process_t * proc, int retval) {
 	shm_release_all(proc);
 	free(proc->shm_mappings);
 	debug_print(INFO, "Freeing more mems %d", proc->id);
-	if (proc->signal_kstack) {
+	if (proc->signal_kstack)
 		free(proc->signal_kstack);
-	}
 	debug_print(INFO, "Dec'ing fds for %d", proc->id);
 	proc->fds->refs--;
 	if (proc->fds->refs == 0) {
@@ -738,9 +721,8 @@ static int wait_candidate(process_t * parent, int pid, int options, process_t * 
 
 int waitpid(int pid, int * status, int options) {
 	process_t * proc = (process_t *)current_process;
-	if (proc->group) {
+	if (proc->group)
 		proc = process_from_pid(proc->group);
-	}
 
 	/* Commenting this debug print for now because it bombs the output console while waiting (in a non-blocking manner) for a pid */
 	/*debug_print(INFO, "waitpid(%s%d, ..., %d) (from pid=%d.%d)", (pid >= 0) ? "" : "-", (pid >= 0) ? pid : -pid, options, current_process->id, current_process->group); */
@@ -751,11 +733,9 @@ int waitpid(int pid, int * status, int options) {
 
 		/* First, find out if there is anyone to reap */
 		foreach(node, proc->tree_entry->children) {
-			if (!node->value) {
+			if (!node->value)
 				continue;
-			}
 			process_t * child = ((tree_node_t *)node->value)->value;
-
 			if (wait_candidate(proc, pid, options, child)) {
 				has_children = 1;
 				if (child->finished) {
@@ -773,16 +753,14 @@ int waitpid(int pid, int * status, int options) {
 
 		if (candidate) {
 			debug_print(INFO, "Candidate found (%x:%d), bailing early.", candidate, candidate->id);
-			if (status) {
+			if (status)
 				*status = candidate->status;
-			}
 			int pid = candidate->id;
 			reap_process(candidate);
 			return pid;
 		} else {
-			if (options & 1) {
+			if (options & 1)
 				return 0;
-			}
 			debug_print(INFO, "Sleeping until queue is done.");
 			/* Wait */
 			if (sleep_on(proc->wait_queue) != 0) {

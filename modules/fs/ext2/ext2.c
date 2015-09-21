@@ -1611,7 +1611,6 @@ fs_node_t * ext2_fs_mount(char * device, char * mount_path) {
 }
 
 int ext2_initialize(void) {
-
 	vfs_register("ext2", ext2_fs_mount);
 
 	return 0;
@@ -1623,6 +1622,3 @@ int ext2_finalize(void) {
 }
 
 MODULE_DEF(ext2, ext2_initialize, ext2_finalize);
-
-
-

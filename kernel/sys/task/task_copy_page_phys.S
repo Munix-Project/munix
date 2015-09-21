@@ -62,6 +62,3 @@ copy_page_physical:
 read_eip:
     mov (%esp), %eax
     ret
-
-
-

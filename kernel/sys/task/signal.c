@@ -85,14 +85,11 @@ void handle_signal(process_t * proc, signal_t * sig) {
 	uintptr_t signum  = sig->signum;
 	free(sig);
 
-	if (proc->finished) {
+	if (proc->finished)
 		return;
-	}
 
-	if (signum == 0 || signum >= NUMSIGNALS) {
-		/* Ignore */
-		return;
-	}
+	if (signum == 0 || signum >= NUMSIGNALS)
+		return; /* Ignore */
 
 	if (!handler) {
 		char dowhat = isdeadly[signum];
@@ -108,22 +105,19 @@ void handle_signal(process_t * proc, signal_t * sig) {
 		return;
 	}
 
-	if (handler == 1) /* Ignore */ {
-		return;
-	}
+	if (handler == 1)
+		return; /* Ignore */
 
 	debug_print(NOTICE, "handling signal in process %d (%d)", proc->id, signum);
 
 	uintptr_t stack = 0xFFFF0000;
-	if (proc->syscall_registers->useresp < 0x10000100) {
+	if (proc->syscall_registers->useresp < 0x10000100)
 		stack = proc->image.user_stack;
-	} else {
+	else
 		stack = proc->syscall_registers->useresp;
-	}
 
 	/* Not marked as ignored, must call signal */
 	enter_signal_handler(handler, signum, stack);
-
 }
 
 list_t * rets_from_sig;
@@ -133,9 +127,8 @@ void return_from_signal_handler(void) {
 	debug_print(INFO, "Return From Signal for process %d", current_process->id);
 #endif
 
-	if (__builtin_expect(!rets_from_sig, 0)) {
+	if (__builtin_expect(!rets_from_sig, 0))
 		rets_from_sig = list_create();
-	}
 
 	spin_lock(sig_lock);
 	list_insert(rets_from_sig, (process_t *)current_process);
@@ -152,9 +145,8 @@ void fix_signal_stacks(void) {
 			spin_lock(sig_lock);
 			node_t * n = list_dequeue(rets_from_sig);
 			spin_unlock(sig_lock);
-			if (!n) {
+			if (!n)
 				continue;
-			}
 			process_t * p = n->value;
 			free(n);
 			if (p == current_process) {
@@ -182,30 +174,20 @@ void fix_signal_stacks(void) {
 int send_signal(pid_t process, uint32_t signal) {
 	process_t * receiver = process_from_pid(process);
 
-	if (!receiver) {
-		/* Invalid pid */
-		return 1;
-	}
+	if (!receiver)
+		return 1; /* Invalid pid */
 
-	if (receiver->user != current_process->user && current_process->user != USER_ROOT_UID) {
-		/* No way in hell. */
-		return 1;
-	}
+	if (receiver->user != current_process->user && current_process->user != USER_ROOT_UID)
+		return 1; /* No way in hell. */
 
-	if (signal > NUMSIGNALS) {
-		/* Invalid signal */
-		return 1;
-	}
+	if (signal > NUMSIGNALS)
+		return 1; /* Invalid signal */
 
-	if (receiver->finished) {
-		/* Can't send signals to finished processes */
-		return 1;
-	}
+	if (receiver->finished)
+		return 1; /* Can't send signals to finished processes */
 
-	if (!receiver->signals.functions[signal] && !isdeadly[signal]) {
-		/* If we're blocking a signal and it's not going to kill us, don't deliver it */
-		return 1;
-	}
+	if (!receiver->signals.functions[signal] && !isdeadly[signal])
+		return 1; /* If we're blocking a signal and it's not going to kill us, don't deliver it */
 
 	/* Append signal to list */
 	signal_t * sig = malloc(sizeof(signal_t));
@@ -213,14 +195,10 @@ int send_signal(pid_t process, uint32_t signal) {
 	sig->signum  = signal;
 	memset(&sig->registers_before, 0x00, sizeof(regs_t));
 
-	if (!process_is_ready(receiver)) {
+	if (!process_is_ready(receiver))
 		make_process_ready(receiver);
-	}
 
 	list_insert(receiver->signal_queue, sig);
 
 	return 0;
 }
-
-
-

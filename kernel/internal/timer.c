@@ -84,4 +84,3 @@ void timer_install(void) {
 	irq_install_handler(TIMER_IRQ, timer_handler);
 	timer_phase(SUBTICKS_PER_TICK); /* 100Hz */
 }
-

@@ -8,6 +8,3 @@ tss_flush:
     mov $0x2B, %ax
     ltr %ax
     ret
-
-
-

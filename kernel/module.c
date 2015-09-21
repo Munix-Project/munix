@@ -30,7 +30,6 @@ typedef struct {
  */
 void (* symbol_find(const char * name))(void) {
 	kernel_symbol_t * k = (kernel_symbol_t *)&kernel_symbols_start;
-
 	while ((uintptr_t)k < (uintptr_t)&kernel_symbols_end) {
 		if (strcmp(k->name, name)) {
 			k = (kernel_symbol_t *)((uintptr_t)k + sizeof *k + strlen(k->name) + 1);
@@ -38,7 +37,6 @@ void (* symbol_find(const char * name))(void) {
 		}
 		return (void (*)(void))k->addr;
 	}
-
 	return NULL;
 }
 
@@ -51,9 +49,8 @@ int module_quickcheck(void * blob) {
 		target->e_ident[3] != ELFMAG3) {
 
 		char * head = (char *)blob;
-		if (head[0] == 'P' && head[1] == 'A' && head[2] == 'C' && head[3] == 'K') {
+		if (head[0] == 'P' && head[1] == 'A' && head[2] == 'C' && head[3] == 'K')
 			return 2;
-		}
 
 		return 0;
 	}
@@ -275,9 +272,8 @@ void * module_load_direct(void * blob, size_t length) {
 	list_t * hash_keys = hashmap_keys(local_symbols);
 	foreach(_key, hash_keys) {
 		char * key = (char *)_key->value;
-		if (startswith(key, "module_info_")) {
+		if (startswith(key, "module_info_"))
 			mod_info = hashmap_get(local_symbols, key);
-		}
 	}
 	list_free(hash_keys);
 	free(hash_keys);

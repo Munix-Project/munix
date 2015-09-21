@@ -28,10 +28,7 @@ page_directory_t *current_directory;
  * @param  src Pointer to source directory to clone from.
  * @return A pointer to a new directory.
  */
-page_directory_t *
-clone_directory(
-		page_directory_t * src
-		) {
+page_directory_t * clone_directory(page_directory_t * src) {
 	/* Allocate a new page directory */
 	uintptr_t phys;
 	page_directory_t * dir = (page_directory_t *)kvmalloc_p(sizeof(page_directory_t), &phys);
@@ -99,11 +96,10 @@ void release_directory_for_exec(page_directory_t * dir) {
 		}
 		if (kernel_directory->tables[i] != dir->tables[i]) {
 			if (i * 0x1000 * 1024 < USER_STACK_BOTTOM) {
-				for (uint32_t j = 0; j < 1024; ++j) {
-					if (dir->tables[i]->pages[j].frame) {
+				for (uint32_t j = 0; j < 1024; ++j)
+					if (dir->tables[i]->pages[j].frame)
 						free_frame(&(dir->tables[i]->pages[j]));
-					}
-				}
+
 				dir->physical_tables[i] = 0;
 				free(dir->tables[i]);
 				dir->tables[i] = 0;
@@ -112,8 +108,6 @@ void release_directory_for_exec(page_directory_t * dir) {
 	}
 }
 
-extern char * default_name;
-
 /*
  * Clone a page table
  *
@@ -121,20 +115,14 @@ extern char * default_name;
  * @param physAddr [out] Pointer to the physical address of the new page table
  * @return         A pointer to a new page table.
  */
-page_table_t *
-clone_table(
-		page_table_t * src,
-		uintptr_t * physAddr
-		) {
+page_table_t * clone_table(page_table_t * src, uintptr_t * physAddr) {
 	/* Allocate a new page table */
 	page_table_t * table = (page_table_t *)kvmalloc_p(sizeof(page_table_t), physAddr);
 	memset(table, 0, sizeof(page_table_t));
-	uint32_t i;
-	for (i = 0; i < 1024; ++i) {
+	for (uint32_t i = 0; i < 1024; ++i) {
 		/* For each frame in the table... */
-		if (!src->pages[i].frame) {
+		if (!src->pages[i].frame)
 			continue;
-		}
 		/* Allocate a new frame */
 		alloc_frame(&table->pages[i], 0, 0);
 		/* Set the correct access bit */
@@ -233,9 +221,8 @@ int create_kernel_tasklet(tasklet_t tasklet, char * name, void * argp) {
 
 	uintptr_t esp, ebp;
 
-	if (current_process->syscall_registers) {
+	if (current_process->syscall_registers)
 		current_process->syscall_registers->eax = 0;
-	}
 
 	page_directory_t * directory = kernel_directory;
 	/* Spawn a new process from this one */
@@ -255,9 +242,9 @@ int create_kernel_tasklet(tasklet_t tasklet, char * name, void * argp) {
 	esp = new_proc->image.stack;
 	ebp = esp;
 
-	if (current_process->syscall_registers) {
+	if (current_process->syscall_registers)
 		new_proc->syscall_registers->eax = 0;
-	}
+
 	new_proc->is_tasklet = 1;
 	new_proc->name = name;
 
@@ -278,7 +265,6 @@ int create_kernel_tasklet(tasklet_t tasklet, char * name, void * argp) {
 	/* Return the child PID */
 	return new_proc->id;
 }
-
 
 /*
  * clone the current thread and create a new one in the same
@@ -311,12 +297,10 @@ uint32_t clone(uintptr_t new_stack, uintptr_t thread_func, uintptr_t arg) {
 	ebp = esp;
 
 	/* Set the gid */
-	if (current_process->group) {
+	if (current_process->group)
 		new_proc->group = current_process->group;
-	} else {
-		/* We are the session leader */
+	else /* We are the session leader */
 		new_proc->group = current_process->id;
-	}
 
 	new_proc->syscall_registers->ebp = new_stack;
 	new_proc->syscall_registers->eip = thread_func;
@@ -372,9 +356,8 @@ void switch_task(uint8_t reschedule) {
 	/* Tasking is not yet installed. */
 	if (!current_process) return;
 
-	if (!current_process->running) {
+	if (!current_process->running)
 		switch_next();
-	}
 
 	/* Collect the current kernel stack and instruction pointers */
 	uintptr_t esp, ebp, eip;
@@ -506,6 +489,3 @@ void kexit(int retval) {
 	debug_print(CRITICAL, "Process returned from task_exit! Environment is definitely unclean. Stopping.");
 	KERNEL_FULL_STOP;
 }
-
-
-
