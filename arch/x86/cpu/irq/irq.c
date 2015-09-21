@@ -1,9 +1,13 @@
-/*
+/* vim: tabstop=4 shiftwidth=4 noexpandtab
  * This file is part of ToaruOS and is released under the terms
  * of the NCSA / University of Illinois License - see LICENSE.md
+ * Copyright (C) 2011-2014 Kevin Lange
  * Copyright (C) 2015 Dale Weiler
  *
+ * Interrupt Requests
+ *
  */
+
 #include <libc/printf.h>
 #include <mod/module.h>
 #include <munix/system.h>

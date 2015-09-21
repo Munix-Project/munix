@@ -1,7 +1,18 @@
-/*
+/* vim: tabstop=4 shiftwidth=4 noexpandtab
  * This file is part of ToaruOS and is released under the terms
  * of the NCSA / University of Illinois License - see LICENSE.md
- * Copyright (C) 2015 Dale Weiler
+ * Copyright (C) 2011-2013 Kevin Lange
+ *
+ * FPU and SSE context handling.
+ *
+ * FPU context is kept through context switches,
+ * but the FPU is disabled. When an FPU instruction
+ * is executed, it will trap here and the context
+ * will be saved to its original owner and the context
+ * for the current process will be loaded or the FPU
+ * will be reset for the new process.
+ *
+ * FPU states are per kernel thread.
  *
  */
 

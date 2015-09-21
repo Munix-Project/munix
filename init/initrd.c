@@ -1,8 +1,11 @@
-/*
+/* vim: tabstop=4 shiftwidth=4 noexpandtab
  * This file is part of ToaruOS and is released under the terms
  * of the NCSA / University of Illinois License - see LICENSE.md
- * Copyright (C) 2015 Dale Weiler
+ * Copyright (C) 2014 Kevin Lange
+  *
+ * Ramdisk driver.
  *
+ * Provide raw block access to files loaded into kernel memory.
  */
 
 #include <debug/logging.h>

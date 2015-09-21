@@ -1,10 +1,3 @@
-/*
- * This file is part of ToaruOS and is released under the terms
- * of the NCSA / University of Illinois License - see LICENSE.md
- * Copyright (C) 2015 Dale Weiler
- *
- */
-
 .set MB_MAGIC,              0x1BADB002
 .set MB_FLAG_PAGE_ALIGN,    1 << 0
 .set MB_FLAG_MEMORY_INFO,   1 << 1

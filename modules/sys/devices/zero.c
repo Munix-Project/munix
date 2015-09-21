@@ -3,7 +3,7 @@
  * of the NCSA / University of Illinois License - see LICENSE.md
  * Copyright (C) 2014 Kevin Lange
  *
- * Null Device
+ * Zero Device
  *
  */
 

@@ -1,9 +1,3 @@
-/*
- * This file is part of ToaruOS and is released under the terms
- * of the NCSA / University of Illinois License - see LICENSE.md
- * Copyright (C) 2015 Dale Weiler
- *
- */
 
 #ifndef USERSPACE_LIB_SOUND_H_
 #define USERSPACE_LIB_SOUND_H_
