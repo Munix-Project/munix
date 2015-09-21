@@ -39,11 +39,10 @@ void _debug_print(char * title, int line_no, log_type_t level, char *fmt, ...) {
 	va_end(args);
 
 	char * type;
-	if (level > INSANE) {
+	if (level > INSANE)
 		type = "";
-	} else {
+	else
 		type = c_messages[level];
-	}
 
 	fprintf(debug_file, "[%10d.%3d:%s:%d]%s %s\n", timer_ticks, timer_subticks, title, line_no, type, buffer);
 }

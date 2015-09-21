@@ -26,8 +26,7 @@ process_t * fpu_thread = NULL;
  *
  * @param cw What to set the control word to.
  */
-void
-set_fpu_cw(const uint16_t cw) {
+void set_fpu_cw(const uint16_t cw) {
 	asm volatile("fldcw %0" :: "m"(cw));
 }
 

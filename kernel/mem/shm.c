@@ -19,17 +19,13 @@
 static spin_lock_t bsl; // big shm lock
 tree_t * shm_tree = NULL;
 
-
 void shm_install(void) {
 	debug_print(NOTICE, "Installing shared memory layer...");
 	shm_tree = tree_create();
 	tree_set_root(shm_tree, NULL);
 }
 
-
 /* Accessors */
-
-
 static shm_node_t * _get_node(char * shm_path, int create, tree_node_t * from) {
 
 	char *pch, *save;
@@ -41,9 +37,8 @@ static shm_node_t * _get_node(char * shm_path, int create, tree_node_t * from) {
 		shm_node_t *  snode = (shm_node_t *)_node->value;
 
 		if (!strcmp(snode->name, pch)) {
-			if (*save == '\0') {
+			if (*save == '\0')
 				return snode;
-			}
 			return _get_node(save, create, _node);
 		}
 	}
@@ -56,10 +51,8 @@ static shm_node_t * _get_node(char * shm_path, int create, tree_node_t * from) {
 
 		tree_node_t * nnode = tree_node_insert_child(shm_tree, from, nsnode);
 
-		if (*save == '\0') {
+		if (*save == '\0')
 			return nsnode;
-		}
-
 		return _get_node(save, create, nnode);
 	} else {
 		return NULL;
@@ -78,8 +71,6 @@ static shm_node_t * get_node (char * shm_path, int create) {
 
 
 /* Create and Release */
-
-
 static shm_chunk_t * create_chunk (shm_node_t * parent, size_t size) {
 	debug_print(WARNING, "Size supplied to create_chunk was 0");
 	if (!size) return NULL;
@@ -144,7 +135,6 @@ static int release_chunk (shm_chunk_t * chunk) {
 
 
 /* Mapping and Unmapping */
-
 static uintptr_t proc_sbrk(uint32_t num_pages, process_t * proc) {
 	uintptr_t initial = proc->image.shm_heap;
 	assert(!(initial & 0xFFF) && "shm_heap not page-aligned!");
@@ -160,9 +150,8 @@ static uintptr_t proc_sbrk(uint32_t num_pages, process_t * proc) {
 }
 
 static void * map_in (shm_chunk_t * chunk, process_t * proc) {
-	if (!chunk) {
+	if (!chunk)
 		return NULL;
-	}
 
 	shm_mapping_t * mapping = malloc(sizeof(shm_mapping_t));
 	mapping->chunk = chunk;
@@ -246,17 +235,13 @@ static size_t chunk_size (shm_chunk_t * chunk) {
 	return (size_t)(chunk->num_frames * 0x1000);
 }
 
-
 /* Kernel-Facing Functions and Syscalls */
-
-
 void * shm_obtain (char * path, size_t * size) {
 	spin_lock(bsl);
 	process_t * proc = (process_t *)current_process;
 
-	if (proc->group != 0) {
+	if (proc->group != 0)
 		proc = process_from_pid(proc->group);
-	}
 
 	shm_node_t * node = get_node(path, 1); // (if it exists, just get it)
 	assert(node && "shm_node_t not created by get_node");
@@ -298,9 +283,8 @@ int shm_release (char * path) {
 	spin_lock(bsl);
 	process_t * proc = (process_t *)current_process;
 
-	if (proc->group != 0) {
+	if (proc->group != 0)
 		proc = process_from_pid(proc->group);
-	}
 
 	/* First, find the right chunk */
 	shm_node_t * _node = get_node(path, 0);
@@ -365,6 +349,3 @@ void shm_release_all (process_t * proc) {
 
 	spin_unlock(bsl);
 }
-
-
-

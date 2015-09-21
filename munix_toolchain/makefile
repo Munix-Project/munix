@@ -17,6 +17,7 @@ RM := rm -rf
 -include kernel/sys/subdir.mk
 -include kernel/mem/subdir.mk
 -include kernel/internal/subdir.mk
+-include kernel/exec/subdir.mk
 -include kernel/debug/subdir.mk
 -include kernel/subdir.mk
 -include init/subdir.mk

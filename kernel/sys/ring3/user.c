@@ -18,5 +18,3 @@ void enter_user_jmp(uintptr_t location, int argc, char ** argv, uintptr_t stack)
 	PUSH(stack, int, argc);
 	enter_userspace(location, stack);
 }
-
-

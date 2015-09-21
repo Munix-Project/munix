@@ -204,7 +204,7 @@ extern int wakeup_queue(list_t * queue);
 extern int wakeup_queue_interrupted(list_t * queue);
 extern int sleep_on(list_t * queue);
 
-// Signal
+/* Signal */
 typedef struct {
 	uint32_t  signum;
 	uintptr_t handler;

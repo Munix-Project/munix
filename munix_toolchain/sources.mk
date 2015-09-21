@@ -20,6 +20,7 @@ arch/x86/cpu/isr \
 fs \
 init \
 kernel/debug \
+kernel/exec \
 kernel/internal \
 kernel/mem \
 kernel \

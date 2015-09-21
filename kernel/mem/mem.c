@@ -82,39 +82,25 @@ uintptr_t kmalloc_real(size_t size, int align, uintptr_t * phys) {
 /*
  * Normal
  */
-uintptr_t
-kmalloc(
-		size_t size
-		) {
+uintptr_t kmalloc(size_t size) {
 	return kmalloc_real(size, 0, NULL);
 }
 /*
  * Aligned
  */
-uintptr_t
-kvmalloc(
-		size_t size
-		) {
+uintptr_t kvmalloc(size_t size) {
 	return kmalloc_real(size, 1, NULL);
 }
 /*
  * With a physical address
  */
-uintptr_t
-kmalloc_p(
-		size_t size,
-		uintptr_t *phys
-		) {
+uintptr_t kmalloc_p(size_t size, uintptr_t *phys) {
 	return kmalloc_real(size, 0, phys);
 }
 /*
  * Aligned, with a physical address
  */
-uintptr_t
-kvmalloc_p(
-		size_t size,
-		uintptr_t *phys
-		) {
+uintptr_t kvmalloc_p(size_t size, uintptr_t *phys) {
 	return kmalloc_real(size, 1, phys);
 }
 
@@ -128,10 +114,7 @@ uint32_t nframes;
 #define INDEX_FROM_BIT(b) (b / 0x20)
 #define OFFSET_FROM_BIT(b) (b % 0x20)
 
-void
-set_frame(
-		uintptr_t frame_addr
-		) {
+void set_frame(uintptr_t frame_addr) {
 	if (frame_addr < nframes * 4 * 0x400) {
 		uint32_t frame  = frame_addr / 0x1000;
 		uint32_t index  = INDEX_FROM_BIT(frame);
@@ -140,10 +123,7 @@ set_frame(
 	}
 }
 
-void
-clear_frame(
-		uintptr_t frame_addr
-		) {
+void clear_frame(uintptr_t frame_addr) {
 	uint32_t frame  = frame_addr / 0x1000;
 	uint32_t index  = INDEX_FROM_BIT(frame);
 	uint32_t offset = OFFSET_FROM_BIT(frame);
@@ -160,14 +140,12 @@ uint32_t test_frame(uintptr_t frame_addr) {
 uint32_t first_n_frames(int n) {
 	for (uint32_t i = 0; i < nframes * 0x1000; i += 0x1000) {
 		int bad = 0;
-		for (int j = 0; j < n; ++j) {
-			if (test_frame(i + 0x1000 * j)) {
+		for (int j = 0; j < n; ++j)
+			if (test_frame(i + 0x1000 * j))
 				bad = j+1;
-			}
-		}
-		if (!bad) {
+
+		if (!bad)
 			return i / 0x1000;
-		}
 	}
 	return 0xFFFFFFFF;
 }
@@ -179,9 +157,8 @@ uint32_t first_frame(void) {
 		if (frames[i] != 0xFFFFFFFF) {
 			for (j = 0; j < 32; ++j) {
 				uint32_t testFrame = NTH_BIT(j);
-				if (!(frames[i] & testFrame)) {
+				if (!(frames[i] & testFrame))
 					return i * 0x20 + j;
-				}
 			}
 		}
 	}
@@ -205,12 +182,7 @@ uint32_t first_frame(void) {
 	return -1;
 }
 
-void
-alloc_frame(
-		page_t *page,
-		int is_kernel,
-		int is_writeable
-		) {
+void alloc_frame(page_t *page, int is_kernel, int is_writeable) {
 	if (page->frame != 0) {
 		page->present = 1;
 		page->rw      = (is_writeable == 1) ? 1 : 0;
@@ -256,7 +228,6 @@ uintptr_t memory_use(void ) {
 		for (uint32_t j = 0; j < 32; ++j)
 			if (frames[i] & NTH_BIT(j))
 				ret++;
-
 	return ret * 4;
 }
 
@@ -351,8 +322,9 @@ uintptr_t map_to_physical(uintptr_t virtual) {
 	if (current_directory->tables[table]) {
 		page_t * p = &current_directory->tables[table]->pages[subframe];
 		return p->frame * 0x1000 + remaining;
-	} else
+	} else {
 		return 0;
+	}
 }
 
 void debug_print_directory(page_directory_t * arg) {
@@ -542,6 +514,3 @@ void * sbrk(uintptr_t increment) {
 	memset(address, 0x0, increment);
 	return address;
 }
-
-
-

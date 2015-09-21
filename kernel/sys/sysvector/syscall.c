@@ -53,7 +53,7 @@ void validate(void * ptr) {
 static int __attribute__((noreturn)) sys_exit(int retval) {
 	/* Deschedule the current task */
 	task_exit(retval);
-	for (;;) ;
+	for (;;);
 }
 
 static int sys_read(int fd, char * ptr, int len) {
@@ -171,12 +171,10 @@ static int sys_sbrk(int size) {
 
 static int sys_getpid(void) {
 	/* The user actually wants the pid of the originating thread (which can be us). */
-	if (current_process->group) {
+	if (current_process->group)
 		return current_process->group;
-	} else {
-		/* We are the leader */
+	else /* We are the leader */
 		return current_process->id;
-	}
 }
 
 /* Actual getpid() */
@@ -235,9 +233,9 @@ static int sys_execve(const char * filename, char *const argv[], char *const env
 
 static int sys_seek(int fd, int offset, int whence) {
 	if (FD_CHECK(fd)) {
-		if (fd < 3) {
+		if (fd < 3)
 			return 0;
-		}
+
 		switch (whence) {
 			case 0:
 				FD_ENTRY(fd)->offset = offset;
@@ -299,9 +297,8 @@ static int sys_statf(char * file, uintptr_t st) {
 	PTR_VALIDATE(st);
 	fs_node_t * fn = kopen(file, 0);
 	result = stat_node(fn, st);
-	if (fn) {
+	if (fn)
 		close_fs(fn);
-	}
 	return result;
 }
 
@@ -317,7 +314,6 @@ static int sys_chmod(char * file, int mode) {
 		return -1;
 	}
 }
-
 
 static int sys_stat(int fd, uintptr_t st) {
 	PTR_VALIDATE(st);
@@ -373,20 +369,12 @@ static int sys_uname(struct utsname * name) {
 }
 
 static int sys_signal(uint32_t signum, uintptr_t handler) {
-	if (signum > NUMSIGNALS) {
+	if (signum > NUMSIGNALS)
 		return -1;
-	}
 	uintptr_t old = current_process->signals.functions[signum];
 	current_process->signals.functions[signum] = handler;
 	return (int)old;
 }
-
-/*
-static void inspect_memory (uintptr_t vaddr) {
-	// Please use this scary hack of a function as infrequently as possible.
-	shmem_debug_frame(vaddr);
-}
-*/
 
 static int sys_reboot(void) {
 	debug_print(NOTICE, "[kernel] Reboot requested from process %d by user #%d", current_process->id, current_process->user);
@@ -438,9 +426,8 @@ static int sys_sethostname(char * new_hostname) {
 	if (current_process->user == USER_ROOT_UID) {
 		PTR_VALIDATE(new_hostname);
 		size_t len = strlen(new_hostname) + 1;
-		if (len > 256) {
+		if (len > 256)
 			return 1;
-		}
 		hostname_len = len;
 		memcpy(hostname, new_hostname, hostname_len);
 		return 0;
@@ -508,9 +495,8 @@ static int sys_sysfunc(int fn, char ** args) {
 					PTR_VALIDATE(args);
 					PTR_VALIDATE(args[0]);
 					fs_node_t * file = kopen((char *)args[0], 0);
-					if (!file) {
+					if (!file)
 						return -1;
-					}
 					size_t length = file->length;
 					uint8_t * buffer = malloc(length);
 					read_fs(file, 0, length, (uint8_t *)buffer);
@@ -518,10 +504,8 @@ static int sys_sysfunc(int fn, char ** args) {
 					debug_print(WARNING, "Finished reading file, going to write it now.");
 
 					fs_node_t * f = kopen("/dev/sdb", 0);
-					if (!f) {
+					if (!f)
 						return 1;
-					}
-
 					write_fs(f, 0, length, buffer);
 
 					free(buffer);
@@ -550,11 +534,10 @@ static int sys_sleepabs(unsigned long seconds, unsigned long subseconds) {
 	/* Switch without adding us to the queue */
 	switch_task(0);
 
-	if (seconds > timer_ticks || (seconds == timer_ticks && subseconds >= timer_subticks)) {
+	if (seconds > timer_ticks || (seconds == timer_ticks && subseconds >= timer_subticks))
 		return 0;
-	} else {
+	else
 		return 1;
-	}
 }
 
 static int sys_sleep(unsigned long seconds, unsigned long subseconds) {
@@ -632,9 +615,8 @@ static int sys_openpty(int * master, int * slave, char * name, void * _ign0, voi
 }
 
 static int sys_pipe(int pipes[2]) {
-	if (pipes && !PTR_INRANGE(pipes)) {
+	if (pipes && !PTR_INRANGE(pipes))
 		return -EFAULT;
-	}
 
 	fs_node_t * outpipes[2];
 
@@ -653,13 +635,11 @@ static int sys_mount(char * arg, char * mountpoint, char * type, unsigned long f
 	(void)flags;
 	(void)data;
 
-	if (current_process->user != USER_ROOT_UID) {
+	if (current_process->user != USER_ROOT_UID)
 		return -EPERM;
-	}
 
-	if (PTR_INRANGE(arg) && PTR_INRANGE(mountpoint) && PTR_INRANGE(type)) {
+	if (PTR_INRANGE(arg) && PTR_INRANGE(mountpoint) && PTR_INRANGE(type))
 		return vfs_mount_type(type, arg, mountpoint);
-	}
 
 	return -EFAULT;
 }
@@ -673,9 +653,8 @@ static int sys_symlink(char * target, char * name) {
 static int sys_readlink(const char * file, char * ptr, int len) {
 	PTR_VALIDATE(file);
 	fs_node_t * node = kopen((char *) file, O_PATH | O_NOFOLLOW);
-	if (!node) {
+	if (!node)
 		return -ENOENT;
-	}
 	int rv = readlink_fs(node, ptr, len);
 	close_fs(node);
 	return rv;
@@ -687,9 +666,8 @@ static int sys_lstat(char * file, uintptr_t st) {
 	PTR_VALIDATE(st);
 	fs_node_t * fn = kopen(file, O_PATH | O_NOFOLLOW);
 	result = stat_node(fn, st);
-	if (fn) {
+	if (fn)
 		close_fs(fn);
-	}
 	return result;
 }
 
@@ -752,9 +730,8 @@ uint32_t num_syscalls = sizeof(syscalls) / sizeof(*syscalls);
 typedef uint32_t (*scall_func)(unsigned int, ...);
 
 void syscall_handler(struct regs * r) {
-	if (r->eax >= num_syscalls) {
+	if (r->eax >= num_syscalls)
 		return;
-	}
 
 	uintptr_t location = (uintptr_t)syscalls[r->eax];
 	if (!location) {
@@ -778,5 +755,3 @@ void syscalls_install(void) {
 	debug_print(NOTICE, "Initializing syscall table with %d functions", num_syscalls);
 	isr_install_handler(0x7F, &syscall_handler);
 }
-
-

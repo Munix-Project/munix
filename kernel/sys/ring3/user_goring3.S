@@ -59,5 +59,3 @@ enter_userspace:
     iret
     popl %ebp
     ret
-
-

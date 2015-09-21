@@ -47,7 +47,7 @@ void assert_failed(const char *file, uint32_t line, const char *desc) {
 		debug_video_crash(msgs);
 	}
 
-	// This is our life now
+	/* This is our life now */
 	while (1) {
 		IRQ_OFF;
 		KERNEL_PAUSE;

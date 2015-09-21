@@ -13,8 +13,7 @@
 char * initrd_disk = NULL;
 struct multiboot * mboot_ptr = NULL;
 
-struct multiboot *
-copy_multiboot(struct multiboot *mboot_ptr) {
+struct multiboot * copy_multiboot(struct multiboot *mboot_ptr) {
 	struct multiboot *new_header = (struct multiboot *)kmalloc(sizeof(struct multiboot));
 	memcpy(new_header, mboot_ptr, sizeof(struct multiboot));
 	return new_header;

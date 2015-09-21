@@ -792,6 +792,3 @@ int waitpid(int pid, int * status, int options) {
 		}
 	} while (1);
 }
-
-
-

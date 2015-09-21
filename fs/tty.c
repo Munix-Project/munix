@@ -17,11 +17,11 @@
 
 typedef struct pty {
 	/* the PTY number */
-	int            name;
+	int name;
 
 	/* Master and slave endpoints */
-	fs_node_t *    master;
-	fs_node_t *    slave;
+	fs_node_t * master;
+	fs_node_t * slave;
 
 	/* term io "window size" struct (width/height) */
 	struct winsize size;
@@ -243,16 +243,17 @@ uint32_t write_pty_slave(fs_node_t * node, uint32_t offset, uint32_t size, uint8
 	pty_t * pty = (pty_t *)node->device;
 
 	size_t l = 0;
-	for (uint8_t * c = buffer; l < size; ++c, ++l) {
+	for (uint8_t * c = buffer; l < size; ++c, ++l)
 		output_process(pty, *c);
-	}
 
 	return l;
 }
-void      open_pty_slave(fs_node_t * node, unsigned int flags) {
+
+void open_pty_slave(fs_node_t * node, unsigned int flags) {
 	return;
 }
-void     close_pty_slave(fs_node_t * node) {
+
+void close_pty_slave(fs_node_t * node) {
 	return;
 }
 

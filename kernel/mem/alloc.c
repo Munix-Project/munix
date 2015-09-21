@@ -176,16 +176,14 @@ void free(void * ptr) {
 /*
  * Adjust bin size in bin_size call to proper bounds.
  */
-static uintptr_t  __attribute__ ((always_inline, pure)) klmalloc_adjust_bin(uintptr_t bin)
-{
+static uintptr_t  __attribute__ ((always_inline, pure)) klmalloc_adjust_bin(uintptr_t bin) {
 	if (bin <= (uintptr_t)SMALLEST_BIN_LOG)
-	{
 		return 0;
-	}
+
 	bin -= SMALLEST_BIN_LOG + 1;
-	if (bin > (uintptr_t)BIG_BIN) {
+	if (bin > (uintptr_t)BIG_BIN)
 		return BIG_BIN;
-	}
+
 	return bin;
 }
 
@@ -320,9 +318,9 @@ static int __attribute__ ((pure, always_inline)) klmalloc_random_level(void) {
 	 * Keep trying to check rand() against 50% of its maximum.
 	 * This provides 50%, 25%, 12.5%, etc. chance for each level.
 	 */
-	while (klmalloc_skip_rand() < SKIP_P && level < SKIP_MAX_LEVEL) {
+	while (klmalloc_skip_rand() < SKIP_P && level < SKIP_MAX_LEVEL)
 		++level;
-	}
+
 	return level;
 }
 
@@ -334,14 +332,13 @@ static klmalloc_big_bin_header * klmalloc_skip_list_findbest(uintptr_t search_si
 	/*
 	 * Loop through the skip list until we hit something > our search value.
 	 */
-	int i;
-	for (i = klmalloc_big_bins.level; i >= 0; --i) {
+	for (int i = klmalloc_big_bins.level; i >= 0; --i)
 		while (node->forward[i] && (node->forward[i]->size < search_size)) {
 			node = node->forward[i];
 			if (node)
 				assert((node->size + sizeof(klmalloc_big_bin_header)) % PAGE_SIZE == 0);
 		}
-	}
+
 	/*
 	 * This value will either be NULL (we found nothing)
 	 * or a node (we found a minimum fit).
@@ -365,11 +362,10 @@ static void klmalloc_skip_list_insert(klmalloc_big_bin_header * value) {
 	assert(value != NULL);
 	assert(value->head != NULL);
 	assert((uintptr_t)value->head > (uintptr_t)value);
-	if (value->size > NUM_BINS) {
+	if (value->size > NUM_BINS)
 		assert((uintptr_t)value->head < (uintptr_t)value + value->size);
-	} else {
+	else
 		assert((uintptr_t)value->head < (uintptr_t)value + PAGE_SIZE);
-	}
 	assert((uintptr_t)value % PAGE_SIZE == 0);
 	assert((value->size + sizeof(klmalloc_big_bin_header)) % PAGE_SIZE == 0);
 	assert(value->size != 0);
@@ -405,9 +401,8 @@ static void klmalloc_skip_list_insert(klmalloc_big_bin_header * value) {
 		 * Get all of the nodes before this.
 		 */
 		if (level > klmalloc_big_bins.level) {
-			for (i = klmalloc_big_bins.level + 1; i <= level; ++i) {
+			for (i = klmalloc_big_bins.level + 1; i <= level; ++i)
 				update[i] = &klmalloc_big_bins.head;
-			}
 			klmalloc_big_bins.level = level;
 		}
 
@@ -440,11 +435,10 @@ static void klmalloc_skip_list_delete(klmalloc_big_bin_header * value) {
 	assert(value != NULL);
 	assert(value->head);
 	assert((uintptr_t)value->head > (uintptr_t)value);
-	if (value->size > NUM_BINS) {
+	if (value->size > NUM_BINS)
 		assert((uintptr_t)value->head < (uintptr_t)value + value->size);
-	} else {
+	else
 		assert((uintptr_t)value->head < (uintptr_t)value + PAGE_SIZE);
-	}
 
 	/*
 	 * Starting from the bin header, again...
@@ -465,15 +459,13 @@ static void klmalloc_skip_list_delete(klmalloc_big_bin_header * value) {
 		update[i] = node;
 	}
 	node = node->forward[0];
-	while (node != value) {
+	while (node != value)
 		node = node->forward[0];
-	}
 
 	if (node != value) {
 		node = klmalloc_big_bins.head.forward[0];
-		while (node->forward[0] && node->forward[0] != value) {
+		while (node->forward[0] && node->forward[0] != value)
 			node = node->forward[0];
-		}
 		node = node->forward[0];
 	}
 	/*
@@ -482,9 +474,9 @@ static void klmalloc_skip_list_delete(klmalloc_big_bin_header * value) {
 	 */
 	if (node == value) {
 		for (i = 0; i <= klmalloc_big_bins.level; ++i) {
-			if (update[i]->forward[i] != node) {
+			if (update[i]->forward[i] != node)
 				break;
-			}
+
 			update[i]->forward[i] = node->forward[i];
 			if (update[i]->forward[i]) {
 				assert((uintptr_t)(update[i]->forward[i]) % PAGE_SIZE == 0);
@@ -492,9 +484,8 @@ static void klmalloc_skip_list_delete(klmalloc_big_bin_header * value) {
 			}
 		}
 
-		while (klmalloc_big_bins.level > 0 && klmalloc_big_bins.head.forward[klmalloc_big_bins.level] == NULL) {
+		while (klmalloc_big_bins.level > 0 && klmalloc_big_bins.head.forward[klmalloc_big_bins.level] == NULL)
 			--klmalloc_big_bins.level;
-		}
 	}
 }
 
@@ -539,11 +530,10 @@ static void * klmalloc_stack_pop(klmalloc_bin_header *header) {
 static void klmalloc_stack_push(klmalloc_bin_header *header, void *ptr) {
 	assert(ptr != NULL);
 	assert((uintptr_t)ptr > (uintptr_t)header);
-	if (header->size > NUM_BINS) {
+	if (header->size > NUM_BINS)
 		assert((uintptr_t)ptr < (uintptr_t)header + header->size);
-	} else {
+	else
 		assert((uintptr_t)ptr < (uintptr_t)header + PAGE_SIZE);
-	}
 	uintptr_t **item = (uintptr_t **)ptr;
 	*item = (uintptr_t *)header->head;
 	header->head = item;
@@ -624,9 +614,9 @@ static void * __attribute__ ((malloc)) klmalloc(uintptr_t size) {
 			bin_header->size = bucket_id;
 		}
 		uintptr_t ** item = klmalloc_stack_pop(bin_header);
-		if (klmalloc_stack_empty(bin_header)) {
+		if (klmalloc_stack_empty(bin_header))
 			klmalloc_list_decouple(&(klmalloc_bin_head[bucket_id]),bin_header);
-		}
+
 		return item;
 	} else {
 		/*
@@ -669,14 +659,13 @@ static void * __attribute__ ((malloc)) klmalloc(uintptr_t size) {
 				assert((uintptr_t)header_new % PAGE_SIZE == 0);
 				memset(header_new, 0, sizeof(klmalloc_big_bin_header) + sizeof(void *));
 				header_new->prev = bin_header;
-				if (bin_header->next) {
+				if (bin_header->next)
 					bin_header->next->prev = header_new;
-				}
+
 				header_new->next = bin_header->next;
 				bin_header->next = header_new;
-				if (klmalloc_newest_big == bin_header) {
+				if (klmalloc_newest_big == bin_header)
 					klmalloc_newest_big = header_new;
-				}
 				header_new->size = old_size - (size + sizeof(klmalloc_big_bin_header));
 				assert(((uintptr_t)header_new->size + sizeof(klmalloc_big_bin_header)) % PAGE_SIZE == 0);
 				fprintf(stderr, "Splitting %p [now %zx] at %p [%zx] from [%zx,%zx].\n", (void*)bin_header, bin_header->size, (void*)header_new, header_new->size, old_size, size);
@@ -704,9 +693,8 @@ static void * __attribute__ ((malloc)) klmalloc(uintptr_t size) {
 			 * Link the block in physical memory.
 			 */
 			bin_header->prev = klmalloc_newest_big;
-			if (bin_header->prev) {
+			if (bin_header->prev)
 				bin_header->prev->next = bin_header;
-			}
 			klmalloc_newest_big = bin_header;
 			bin_header->next = NULL;
 			/*
@@ -723,9 +711,8 @@ static void klfree(void *ptr) {
 	/*
 	 * C standard implementation: Do nothing when NULL is passed to free.
 	 */
-	if (__builtin_expect(ptr == NULL, 0)) {
+	if (__builtin_expect(ptr == NULL, 0))
 		return;
-	}
 
 	/*
 	 * Woah, woah, hold on, was this a page-aligned block?
@@ -792,9 +779,8 @@ static void klfree(void *ptr) {
 					 */
 					klmalloc_newest_big = bheader;
 				} else {
-					if (next->next) {
+					if (next->next)
 						next->next->prev = bheader;
-					}
 				}
 				fprintf(stderr,"Coelesced (forwards)  %p [%zx] <- %p [%zx] = %zx\n", (void*)bheader, old_size, (void*)next, next->size, bheader->size);
 			}
@@ -820,9 +806,8 @@ static void klfree(void *ptr) {
 				if (klmalloc_newest_big == bheader) {
 					klmalloc_newest_big = bheader->prev;
 				} else {
-					if (bheader->next) {
+					if (bheader->next)
 						bheader->next->prev = bheader->prev;
-					}
 				}
 				fprintf(stderr,"Coelesced (backwards) %p [%zx] <- %p [%zx] = %zx\n", (void*)bheader->prev, old_size, (void*)bheader, bheader->size, bheader->size);
 				/*
@@ -847,9 +832,8 @@ static void klfree(void *ptr) {
 		 * a block from a previously full bin.
 		 * Return it to the busy bins list.
 		 */
-		if (klmalloc_stack_empty(header)) {
+		if (klmalloc_stack_empty(header))
 			klmalloc_list_insert(&klmalloc_bin_head[bucket_id], header);
-		}
 		/*
 		 * Push new space back into the stack.
 		 */
@@ -884,8 +868,7 @@ static void * __attribute__ ((malloc)) klrealloc(void *ptr, uintptr_t size) {
 	 * C standard implementation: For a size of zero, free the
 	 * pointer and return NULL, allocating no new memory.
 	 */
-	if (__builtin_expect(size == 0, 0))
-	{
+	if (__builtin_expect(size == 0, 0)) {
 		free(ptr);
 		return NULL;
 	}
@@ -966,6 +949,3 @@ static void * __attribute__ ((malloc)) klcalloc(uintptr_t nmemb, uintptr_t size)
 	return ptr;
 }
 /* }}} */
-
-
-

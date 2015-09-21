@@ -36,20 +36,16 @@ uint16_t pci_find_type(uint32_t dev) {
 }
 
 const char * pci_vendor_lookup(unsigned short vendor_id) {
-	for (unsigned int i = 0; i < PCI_VENTABLE_LEN; ++i) {
-		if (PciVenTable[i].VenId == vendor_id) {
+	for (unsigned int i = 0; i < PCI_VENTABLE_LEN; ++i)
+		if (PciVenTable[i].VenId == vendor_id)
 			return PciVenTable[i].VenFull;
-		}
-	}
 	return "";
 }
 
 const char * pci_device_lookup(unsigned short vendor_id, unsigned short device_id) {
-	for (unsigned int i = 0; i < PCI_DEVTABLE_LEN; ++i) {
-		if (PciDevTable[i].VenId == vendor_id && PciDevTable[i].DevId == device_id) {
+	for (unsigned int i = 0; i < PCI_DEVTABLE_LEN; ++i)
+		if (PciDevTable[i].VenId == vendor_id && PciDevTable[i].DevId == device_id)
 			return PciDevTable[i].ChipDesc;
-		}
-	}
 	return "";
 }
 
@@ -62,51 +58,47 @@ void pci_scan_hit(pci_func_t f, uint32_t dev, void * extra) {
 
 void pci_scan_func(pci_func_t f, int type, int bus, int slot, int func, void * extra) {
 	uint32_t dev = pci_box_device(bus, slot, func);
-	if (type == -1 || type == pci_find_type(dev)) {
+	if (type == -1 || type == pci_find_type(dev))
 		pci_scan_hit(f, dev, extra);
-	}
-	if (pci_find_type(dev) == PCI_TYPE_BRIDGE) {
+
+	if (pci_find_type(dev) == PCI_TYPE_BRIDGE)
 		pci_scan_bus(f, type, pci_read_field(dev, PCI_SECONDARY_BUS, 1), extra);
-	}
 }
 
 void pci_scan_slot(pci_func_t f, int type, int bus, int slot, void * extra) {
 	uint32_t dev = pci_box_device(bus, slot, 0);
-	if (pci_read_field(dev, PCI_VENDOR_ID, 2) == PCI_NONE) {
+	if (pci_read_field(dev, PCI_VENDOR_ID, 2) == PCI_NONE)
 		return;
-	}
+
 	pci_scan_func(f, type, bus, slot, 0, extra);
-	if (!pci_read_field(dev, PCI_HEADER_TYPE, 1)) {
+	if (!pci_read_field(dev, PCI_HEADER_TYPE, 1))
 		return;
-	}
+
 	for (int func = 1; func < 8; func++) {
 		uint32_t dev = pci_box_device(bus, slot, func);
-		if (pci_read_field(dev, PCI_VENDOR_ID, 2) != PCI_NONE) {
+		if (pci_read_field(dev, PCI_VENDOR_ID, 2) != PCI_NONE)
 			pci_scan_func(f, type, bus, slot, func, extra);
-		}
 	}
 }
 
 void pci_scan_bus(pci_func_t f, int type, int bus, void * extra) {
-	for (int slot = 0; slot < 32; ++slot) {
+	for (int slot = 0; slot < 32; ++slot)
 		pci_scan_slot(f, type, bus, slot, extra);
-	}
 }
 
 void pci_scan(pci_func_t f, int type, void * extra) {
 	pci_scan_bus(f, type, 0, extra);
 
-	if (!pci_read_field(0, PCI_HEADER_TYPE, 1)) {
+	if (!pci_read_field(0, PCI_HEADER_TYPE, 1))
 		return;
-	}
 
 	for (int func = 1; func < 8; ++func) {
 		uint32_t dev = pci_box_device(0, 0, func);
-		if (pci_read_field(dev, PCI_VENDOR_ID, 2) != PCI_NONE) {
+		if (pci_read_field(dev, PCI_VENDOR_ID, 2) != PCI_NONE)
 			pci_scan_bus(f, type, func, extra);
-		} else {
+		else
 			break;
-		}
+
 	}
 }
 

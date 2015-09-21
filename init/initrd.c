@@ -21,9 +21,8 @@ static void     close_initrd(fs_node_t *node);
 
 static uint32_t read_initrd(fs_node_t *node, uint32_t offset, uint32_t size, uint8_t *buffer) {
 
-	if (offset > node->length) {
+	if (offset > node->length)
 		return 0;
-	}
 
 	if (offset + size > node->length) {
 		unsigned int i = node->length - offset;
@@ -36,9 +35,8 @@ static uint32_t read_initrd(fs_node_t *node, uint32_t offset, uint32_t size, uin
 }
 
 static uint32_t write_initrd(fs_node_t *node, uint32_t offset, uint32_t size, uint8_t *buffer) {
-	if (offset > node->length) {
+	if (offset > node->length)
 		return 0;
-	}
 
 	if (offset + size > node->length) {
 		unsigned int i = node->length - offset;
@@ -86,5 +84,3 @@ fs_node_t * initrd_mount(uintptr_t location, size_t size) {
 
 	return NULL;
 }
-
-

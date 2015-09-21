@@ -32,11 +32,7 @@ void cmos_dump(uint16_t * values) {
  * @param month Pointer to a short to store the month
  * @param day   Pointer to a short to store the day
  */
-void
-get_date(
-		uint16_t * month,
-		uint16_t * day
-		) {
+void get_date(uint16_t * month, uint16_t * day) {
 	uint16_t values[128]; /* CMOS dump */
 	cmos_dump(values);
 
@@ -51,12 +47,7 @@ get_date(
  * @param minutes Pointer to a short to store the current minute
  * @param seconds Pointer to a short to store the current second
  */
-void
-get_time(
-		uint16_t * hours,
-		uint16_t * minutes,
-		uint16_t * seconds
-		) {
+void get_time(uint16_t * hours, uint16_t * minutes, uint16_t * seconds) {
 	uint16_t values[128]; /* CMOS dump */
 	cmos_dump(values);
 
